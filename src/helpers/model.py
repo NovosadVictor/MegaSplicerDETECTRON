@@ -4,7 +4,7 @@ from scipy.stats import pearsonr, mannwhitneyu, zscore
 from sklearn.metrics import r2_score
 
 from src.consts import muted_columns
-from src.utils import logit, inlogit
+from src.utils.common import logit, inlogit
 
 
 def prepare_model_data(df, is_numpy=False):
