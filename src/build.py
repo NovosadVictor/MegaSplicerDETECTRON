@@ -2,8 +2,7 @@ import pickle
 
 from src.helpers.plots import plot_isoforms_tree
 from src.lr import elastic_net
-from src.helpers.pipeline import map_motifs_to_exons, make_exons_sf_df
-from src.utils.common import *
+from src.helpers.pipeline import map_motifs_to_exons, make_exons_sf_df, load_config_and_input_data
 
 
 def main(config_path):
