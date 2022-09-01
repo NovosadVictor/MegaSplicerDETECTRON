@@ -1,7 +1,19 @@
 import pandas as pd
-from consts import genes_data, motifs_data
-from tree import TranscriptsTreeNode
-from utils import find_substring_occurrences
+from src.consts import genes_data, base_dir
+from src.tree import TranscriptsTreeNode
+from src.utils.common import find_substring_occurrences
+
+
+def load_rbp_data():
+    return pd.read_csv('/huge/bulk/TCGA/TCGA-COMBINED/combined/sfs_FPKM.tsv', sep='\t', index_col=0).T
+
+
+def load_isoforms(gene_name):
+    return 2**pd.read_csv(f'/huge/bulk/TCGA/TCGA-COMBINED/isoforms/by_gene/{gene_name}_isoform_FPKM.tsv', sep='\t', index_col=0) - 1
+
+
+def load_rbps():
+    return pd.read_csv(f'{base_dir}/../data/new_splicing_factors_symbols.tsv', sep='\t', index_col=0)
 
 
 def get_first_variable_exon(transcripts, starting=-1):
@@ -37,15 +49,11 @@ def load_data(gene_name):
     return map_exons_to_numbers(genes_data.copy().get(gene_name))
 
 
-def filter_isoforms(isoforms_df):
-    return isoforms_df.drop(columns=[
-        c for c in isoforms_df
-        if isoforms_df[c].mean() < 1 or isoforms_df[c].var() < 10
+def filter_columns_by_expression(df, tresh_mean, tresh_var):
+    return df.drop(columns=[
+        c for c in df
+        if df[c].mean() < tresh_mean or df[c].var() < tresh_var
     ])
-
-
-def load_isoforms(gene_name):
-    return filter_isoforms(2**pd.read_csv(f'/huge/bulk/TCGA/TCGA-COMBINED/isoforms/by_gene/{gene_name}_isoform_FPKM.tsv', sep='\t', index_col=0) - 1)
 
 
 def make_exon_sf_df(sfs_df, isoforms_df, gene_exon_motifs, exon_number, node_isoforms, parent_isoforms, tr_low=1.0, tr_high=0.0):
@@ -60,7 +68,8 @@ def make_exon_sf_df(sfs_df, isoforms_df, gene_exon_motifs, exon_number, node_iso
     exon_df = sfs_df[set(exon_sfs) & set(sfs_df.columns)]
     exon_df.loc[:, 'fraq'] = isoforms_df[node_isoforms].sum(axis=1) / isoforms_df[parent_isoforms].sum(axis=1)
     exon_df.loc[:, 'fraq'] = (exon_df['fraq'] * (len(exon_df) - 1) + 0.5) / len(exon_df)
-    exon_df.loc[:, 'Tissue'] = sfs_df['Tissue']
+    if 'Tissue' in sfs_df.columns:
+        exon_df.loc[:, 'Tissue'] = sfs_df['Tissue']
 
     return exon_df
 
@@ -118,7 +127,7 @@ def make_exons_sf_df(gene_data, sfs_df, isoforms_df, gene_exon_motifs):
     return transcripts_tree
 
 
-def map_motifs_to_exons(gene_data):
+def map_motifs_to_exons(gene_data, motifs_data):
     motifs = motifs_data.copy()
     exons = pd.DataFrame(gene_data['exons']).drop_duplicates()
     variable_exons = pd.DataFrame(gene_data['variable_exons']).drop_duplicates()

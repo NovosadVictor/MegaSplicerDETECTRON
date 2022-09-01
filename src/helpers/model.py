@@ -3,8 +3,8 @@ import pandas as pd
 from scipy.stats import pearsonr, mannwhitneyu, zscore
 from sklearn.metrics import r2_score
 
-from consts import muted_columns
-from utils import logit, inlogit
+from src.consts import muted_columns
+from src.utils import logit, inlogit
 
 
 def prepare_model_data(df, is_numpy=False):

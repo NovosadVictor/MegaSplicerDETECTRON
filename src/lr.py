@@ -3,8 +3,8 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import ElasticNet, LinearRegression
 
 from consts import muted_columns
-from helpers.model import prepare_model_data, get_accuracy, remove_outliers
-from utils import inlogit, logit
+from src.helpers.model import prepare_model_data, get_accuracy, remove_outliers
+from src.utils.common import inlogit, logit
 
 
 def custom_score_grouped(groups):

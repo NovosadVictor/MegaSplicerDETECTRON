@@ -3,19 +3,17 @@ import pandas as pd
 import numpy as np
 import traceback
 
-from helpers.pipeline import \
-    load_data, \
-    map_motifs_to_exons, \
-    make_exons_sf_df, \
-    load_isoforms, \
-    set_variable_exons
+from helpers import load_data, map_motifs_to_exons, make_exons_sf_df, load_isoforms, set_variable_exons
 from consts import genes_data, tcga_sfs
 from lr import elastic_net
-from utils import make_sure_dir_exists
+from src.utils import make_sure_dir_exists
 
 
 def process(gene):
     try:
+        df_path = f'{gene}_df.csv'
+        coefs_path = f'{gene}_coefs.csv'
+
         make_sure_dir_exists(f'results/{gene}')
         gene_data = load_data(gene)
 
