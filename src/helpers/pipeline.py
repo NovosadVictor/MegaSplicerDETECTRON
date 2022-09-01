@@ -215,7 +215,7 @@ def load_config_and_input_data(config_path):
     config_dirname = os.path.dirname(config_path)
 
     gene = config['gene']
-    if os.path.isfile(config.get('rbp_data_path')):
+    if config.get('rbp_data_path') and os.path.isfile(config['rbp_data_path']):
         rbp_df = pd.read_csv(os.path.join(config_dirname, config['rbp_data_path']), index_col=0)
     else:
         rbp_df = load_rbp_data()
@@ -224,7 +224,7 @@ def load_config_and_input_data(config_path):
         tresh_mean=config.get('rbps_tresh_mean', 1),
         tresh_var=config.get('rbps_tresh_var', 3),
     )
-    if os.path.isfile(config.get('isoforms_data_path')):
+    if config.get('isoforms_data_path') and os.path.isfile(config['isoforms_data_path']):
         isoforms_df = pd.read_csv(os.path.join(config_dirname, config['isoforms_data_path']), index_col=0)
     else:
         isoforms_df = load_isoforms(gene)
@@ -233,7 +233,7 @@ def load_config_and_input_data(config_path):
         tresh_mean=config.get('isoforms_tresh_mean', 1),
         tresh_var=config.get('isoforms_tresh_var', 10),
     )
-    if os.path.isfile(config.get('rbps_path')):
+    if config.get('rbps_path') and os.path.isfile(config['rbps_path']):
         rbps = pd.read_csv(os.path.join(config_dirname, config['rbps_path']), index_col=0)
     else:
         rbps = load_rbps()
