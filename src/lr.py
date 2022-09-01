@@ -2,7 +2,7 @@ from bio import *
 from sklearn.model_selection import GridSearchCV
 from sklearn.linear_model import ElasticNet, LinearRegression
 
-from consts import muted_columns
+from src.consts import muted_columns
 from src.helpers.model import prepare_model_data, get_accuracy, remove_outliers
 from src.utils.common import inlogit, logit
 
