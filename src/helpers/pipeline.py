@@ -62,7 +62,7 @@ def load_data(gene_name):
 def filter_columns_by_expression(df, tresh_mean, tresh_var):
     return df.drop(columns=[
         c for c in df
-        if df[c].mean() < tresh_mean or df[c].var() < tresh_var
+        if np.issubdtype(df[c].dtype, np.number) and (df[c].mean() < tresh_mean or df[c].var() < tresh_var)
     ])
 
 
