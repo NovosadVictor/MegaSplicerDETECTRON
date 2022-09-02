@@ -55,7 +55,6 @@ def plot_isoforms_tree(tree, output_dir):
             G.add_node(node_index)
             node_labels[node_index] = '\n'.join([t['transcript_id'] for t in parent_transcripts])
             if parent.parent:
-                print(parent, parent.kwargs, parent.parent.kwargs)
                 node_labels[node_index] += f'\n{parent.divider_exon}' + '\n' + \
                                            ','.join([t['transcript_id'][-4:] for t in parent_transcripts]) + '\n' + \
                                            ','.join([t['transcript_id'][-4:] for t in parent.parent.kwargs])
