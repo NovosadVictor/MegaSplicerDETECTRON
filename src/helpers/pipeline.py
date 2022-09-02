@@ -245,9 +245,9 @@ def load_config_and_input_data(config_path):
     gene_data = set_variable_exons(gene_data)
     gene_data['sequence'] = gene_data['sequence'].replace('T', 'U')
 
-    output_dir = make_sure_dir_exists(os.path.join(config_dirname, config['output_dir']))
-    copyfile(config_path, os.path.join(output_dir, 'config.json'))
-    plot_gene_isoforms(gene_data, output_dir=output_dir)
+    config['output_dir'] = make_sure_dir_exists(os.path.join(config_dirname, config['output_dir']))
+    copyfile(config_path, os.path.join(config['output_dir'], 'config.json'))
+    plot_gene_isoforms(gene_data, output_dir=config['output_dir'])
 
     print('Loaded config...')
 
