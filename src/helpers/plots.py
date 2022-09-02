@@ -57,8 +57,8 @@ def plot_isoforms_tree(tree, output_dir):
             if parent.parent:
                 print(parent, parent.kwargs, parent.parent.kwargs)
                 node_labels[node_index] += f'\n{parent.divider_exon}' + '\n' + \
-                                           ','.join([t[-4:] for t in parent_transcripts]) + '\n' + \
-                                           ','.join([t[-4:] for t in parent.parent.kwargs])
+                                           ','.join([t['transcript_id'][-4:] for t in parent_transcripts]) + '\n' + \
+                                           ','.join([t['transcript_id'][-4:] for t in parent.parent.kwargs])
 
             if lvl > 0:
                 G.add_edge(parent.parent.node_id, node_index)
