@@ -19,7 +19,7 @@ def main(config_path):
     )
     plot_isoforms_tree(tree, config['output_dir'])
 
-    nodes = [tree.left_child, tree.rightt_child]
+    nodes = [tree.left_child, tree.right_child]
     while len(nodes):
         for node in nodes[::2]:
             df = node.df
