@@ -50,14 +50,13 @@ def plot_isoforms_tree(tree, output_dir):
         cur_parents = []
         for node_id, parent in enumerate(parents):
             parent_transcripts = parent.kwargs
-            parent_df = parent.df
             node_index = f'{lvl}_{node_id}'
             parent.node_id = node_index
             G.add_node(node_index)
             node_labels[node_index] = '\n'.join([t['transcript_id'] for t in parent_transcripts])
-            if parent_df is not None:
-                node_labels[node_index] += f'\n{parent_df[0]}' + '\n' + ','.join(
-                    [t[-4:] for t in parent_df[1]]) + '\n' + ','.join([t[-4:] for t in parent_df[2]])
+            if parent.parent:
+                node_labels[node_index] += f'\n{parent.divider_exon}' + '\n' + ','.join(
+                    [t[-4:] for t in parent_transcripts]) + '\n' + ','.join([t[-4:] for t in (parent.parent.kwargs or [])])
 
             if lvl > 0:
                 G.add_edge(parent.parent.node_id, node_index)
