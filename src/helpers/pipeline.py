@@ -214,7 +214,7 @@ def load_config_and_input_data(config_path):
     # Paths are absolute or relative to config file
     config_dirname = os.path.dirname(config_path)
 
-    gene = config['gene']
+    gene = config['gene_name']
     if config.get('rbp_data_path') and os.path.isfile(config['rbp_data_path']):
         rbp_df = pd.read_csv(os.path.join(config_dirname, config['rbp_data_path']), index_col=0)
     else:
