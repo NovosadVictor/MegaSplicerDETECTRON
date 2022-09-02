@@ -1,4 +1,5 @@
 import pickle
+import sys
 
 from src.helpers.plots import plot_isoforms_tree
 from src.lr import elastic_net
@@ -8,6 +9,7 @@ from src.helpers.pipeline import map_motifs_to_exons, make_exons_sf_df, load_con
 def main(config_path):
     # Load config and input data
     config, gene_data, rbp_df, isoforms_df, rbps = load_config_and_input_data(config_path)
+    print(rbps)
 
     exons_motifs = map_motifs_to_exons(gene_data, rbps)
     tree = make_exons_sf_df(
