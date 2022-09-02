@@ -8,7 +8,7 @@ from src.consts import exon_len, intron_len
 
 
 def plot_gene_isoforms(gene_data, output_dir):
-    gene = gene_data['gene']
+    gene = gene_data['gene_name']
     seq_len = exon_len * len(gene_data['exon_numbers']) + intron_len * (len(gene_data['exon_numbers']) - 1)
 
     imgs = []
