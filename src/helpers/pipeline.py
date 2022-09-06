@@ -74,13 +74,12 @@ def make_exon_sf_df(sfs_df, isoforms_df, gene_exon_motifs, exon_number, node_iso
                | ((gene_exon_motifs['Loc.Percent'] >= tr_high) | (gene_exon_motifs['Loc.Percent'] <= tr_low))
        )
     ].index)
-
+    #
     exon_df = sfs_df[set(exon_sfs) & set(sfs_df.columns)]
     exon_df.loc[:, 'fraq'] = isoforms_df[node_isoforms].sum(axis=1) / isoforms_df[parent_isoforms].sum(axis=1)
     exon_df.loc[:, 'fraq'] = (exon_df['fraq'] * (len(exon_df) - 1) + 0.5) / len(exon_df)
-    if 'Tissue' in sfs_df.columns:
-        exon_df.loc[:, 'Tissue'] = sfs_df['Tissue']
-
+    exon_df.loc[:, set(sfs_df.columns) - set(exon_df.columns)] = sfs_df[set(sfs_df.columns) - set(exon_df.columns)]
+    #
     return exon_df
 
 
