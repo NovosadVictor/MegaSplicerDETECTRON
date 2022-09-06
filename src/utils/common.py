@@ -3,8 +3,11 @@ import re
 from functools import partial
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from scipy.stats import pearsonr, mannwhitneyu
 from sklearn.metrics import r2_score
+
+from src.consts import muted_columns
 
 
 def save_plt_fig(name, format):
@@ -77,3 +80,17 @@ def get_scores(pred, true):
         'mean_pred': mean_pred,
         'mean_true': mean_true,
     }
+
+
+def add_freq_to_df(df, min_samples=10, min_expr=3):
+    tissue_group = df.groupby(['Tissue'])
+    df = tissue_group.filter(lambda g: len(g) >= min_samples)
+    tissues = pd.DataFrame(df['Tissue'].value_counts())
+    df = df[[c for c in df.columns if c not in muted_columns if (tissue_group[c].quantile(0.8) >= min_expr).any()] + list(set(muted_columns)&set(df.columns))]
+    tissues.columns = ['Freq']
+    tissues['Freq'] = tissues['Freq'].max() / tissues['Freq']
+    tissues['Freq'] = np.log2(tissues['Freq'] + 1)
+    tissues['Tissue'] = tissues.index
+    df = df.reset_index().merge(tissues, on='Tissue').set_index('index')
+    #
+    return df

@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 from src.helpers.pipeline import map_motifs_to_exons, make_exons_sf_df
 from src.helpers.plots import plot_isoforms_tree, plot_gene_isoforms
 from src.lr import elastic_net
-from src.utils.common import predict, get_accuracy, get_scores
+from src.utils.common import predict, get_accuracy, get_scores, add_freq_to_df
 
 
 class Pipeline:
@@ -18,6 +18,9 @@ class Pipeline:
         self.rbps = rbps
         self.tree = None
         self.tissue_specific = self.config.get('tissue_specific', False) and 'Tissue' in self.rbp_df
+        if self.tissue_specific:
+            self.rbp_df = add_freq_to_df(self.rbp_df)
+
         if 'Dataset.Type' in self.rbp_df.columns:
             self.train_index = self.rbp_df[self.rbp_df['Dataset.Type'] == 'Training'].index
             self.val_index = self.rbp_df[self.rbp_df['Dataset.Type'] == 'Validation'].index

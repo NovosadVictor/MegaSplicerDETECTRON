@@ -8,7 +8,7 @@ from shutil import copyfile
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.consts import genes_data, base_dir
+from src.consts import genes_data, base_dir, muted_columns
 from src.helpers.plots import plot_gene_isoforms
 from src.tree import TranscriptsTreeNode
 from src.utils.common import find_substring_occurrences, intersect_dfs, make_sure_dir_exists
@@ -202,7 +202,7 @@ def load_config_and_input_data(config_path):
     -------
     dict, dict, pd.DataFrame, pd.DataFrame, pd.DataFrame
     """
-
+    #
     print('Loading config...')
     try:
         config_file = open(config_path, 'r')
@@ -210,10 +210,10 @@ def load_config_and_input_data(config_path):
     except:
         print('Cannot open configuration file', file=sys.stderr)
         sys.exit(1)
-
+    #
     # Paths are absolute or relative to config file
     config_dirname = os.path.dirname(config_path)
-
+    #
     gene = config['gene']
     if config.get('rbp_data_path') and os.path.isfile(config['rbp_data_path']):
         rbp_df = pd.read_csv(os.path.join(config_dirname, config['rbp_data_path']), sep='\t', index_col=0)
@@ -223,7 +223,8 @@ def load_config_and_input_data(config_path):
         rbp_df,
         tresh_mean=config.get('rbps_tresh_mean', 1),
         tresh_var=config.get('rbps_tresh_var', 3),
-    )
+    ).rename(columns={'Cancer': 'Tissue'})
+    #
     if config.get('isoforms_data_path') and os.path.isfile(config['isoforms_data_path']):
         isoforms_df = pd.read_csv(os.path.join(config_dirname, config['isoforms_data_path']), sep='\t', index_col=0)
     else:
@@ -237,17 +238,17 @@ def load_config_and_input_data(config_path):
         rbps = pd.read_csv(os.path.join(config_dirname, config['rbps_path']), sep='\t', index_col=0)
     else:
         rbps = load_rbps()
-
+    #
     rbp_df, isoforms_df = intersect_dfs([rbp_df, isoforms_df])
-
+    #
     gene_data = load_data(gene)
     gene_data['transcripts'] = [t for t in gene_data['transcripts'] if t['transcript_id'] in isoforms_df.columns]
     gene_data = set_variable_exons(gene_data)
     gene_data['sequence'] = gene_data['sequence'].replace('T', 'U')
-
+    #
     config['output_dir'] = make_sure_dir_exists(os.path.join(config_dirname, config['output_dir']))
     copyfile(config_path, os.path.join(config['output_dir'], 'config.json'))
-
+    #
     print('Loaded config...')
-
-    return config, gene_data, rbp_df, isoforms_df, rbps
+    #
+    return config, gene_data, rbp_df.astype({col: np.float64 for col in rbp_df.columns if col not in muted_columns}), isoforms_df, rbps
