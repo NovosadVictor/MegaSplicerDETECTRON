@@ -36,20 +36,20 @@ class Pipeline:
             gene_exon_motifs=exons_motifs,
         )
 
-nodes = [tree.left_child, tree.right_child]
-while len(nodes):
-    for node in nodes[::2]:
-        df = node.df.loc[self.train_index]
-        if len(df.columns) > 2:
-            res = elastic_net(df)
-            node.res = res
-            if self.tissue_specific:
-                node.tissue_res = {}
-                for tissue in set(df['Tissue']):
-                    tissue_df = df[df['Tissue'] == tissue]
-                    tissue_df['Freq'] = 1
-                    res = elastic_net(tissue_df)
-                    node.tissue_res[tissue] = res
+        nodes = [tree.left_child, tree.right_child]
+        while len(nodes):
+            for node in nodes[::2]:
+                df = node.df.loc[self.train_index]
+                if len(df.columns) > 2:
+                    res = elastic_net(df)
+                    node.res = res
+                    if self.tissue_specific:
+                        node.tissue_res = {}
+                        for tissue in set(df['Tissue']):
+                            tissue_df = df[df['Tissue'] == tissue]
+                            tissue_df['Freq'] = 1
+                            res = elastic_net(tissue_df)
+                            node.tissue_res[tissue] = res
 
             cur_nodes = []
             for node in nodes:
