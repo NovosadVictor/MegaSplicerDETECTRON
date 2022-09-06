@@ -3,6 +3,8 @@ import re
 from functools import partial
 import matplotlib.pyplot as plt
 import numpy as np
+from scipy.stats import pearsonr, mannwhitneyu
+from sklearn.metrics import r2_score
 
 
 def save_plt_fig(name, format):
@@ -42,3 +44,36 @@ def inlogit(y):
 
 def find_substring_occurrences(substring, string):
     return [m.start() for m in re.finditer(substring, string)]
+
+
+def predict(df, coefs, logit=True):
+    cols = set(df.columns) & set(coefs.index)
+    df_pred = df[cols].mul(coefs.loc[cols, 'Estimate'], axis=1).sum(axis=1)
+    if '(Intercept)' in coefs.index:
+        df_pred += coefs.loc['(Intercept)']['Estimate']
+    return df_pred if logit else inlogit(df_pred)
+
+
+def get_accuracy(coefs, df):
+    predictions = predict(df, coefs)
+    return get_scores(predictions, df['fraq'])
+
+
+def get_scores(pred, true):
+    cor = pearsonr(pred, logit(true))[0]
+    r2 = max(0, r2_score(pred, logit(true)))
+    mann_w = mannwhitneyu(inlogit(pred), true)[1]
+    #
+    mean_pred, mean_true = np.median(inlogit(pred)), np.median(true)
+    uplift = (mean_pred - mean_true) / mean_true
+    uplift_score = max(0, 1 - abs(uplift))
+    #
+    return {
+        'cor': cor,
+        'r2': r2,
+        'mann-w': mann_w,
+        'uplift': uplift,
+        'uplift.score': uplift_score,
+        'mean_pred': mean_pred,
+        'mean_true': mean_true,
+    }

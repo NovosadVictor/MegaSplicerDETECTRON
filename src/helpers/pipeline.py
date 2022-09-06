@@ -247,7 +247,6 @@ def load_config_and_input_data(config_path):
 
     config['output_dir'] = make_sure_dir_exists(os.path.join(config_dirname, config['output_dir']))
     copyfile(config_path, os.path.join(config['output_dir'], 'config.json'))
-    plot_gene_isoforms(gene_data, output_dir=config['output_dir'])
 
     print('Loaded config...')
 
