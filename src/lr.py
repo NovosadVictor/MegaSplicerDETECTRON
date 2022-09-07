@@ -28,10 +28,10 @@ def custom_score_grouped(groups):
 def elastic_net(train, alpha=np.power(2.0, range(-5, 2)), l1_ratio=[1, 0.5, 0.1], **kwargs):
     train_ = remove_outliers(train)
     cols, train_X, train_Y = prepare_model_data(train_, is_numpy=False)
-    if np.var(inlogit(train_Y)) < 0.001:
+    if train_Y.empty or np.var(inlogit(train_Y)) < 0.001:
         model = LinearRegression()
         model.coef_ = np.zeros(shape=(len(cols), ))
-        model.intercept_ = logit(np.median(inlogit(train_Y)))
+        model.intercept_ = logit(np.median(inlogit(train['fraq'])))
         coefs = pd.DataFrame({'(Intercept)': {'Estimate': model.intercept_, 'p-value': 0}}).T
         return {
             'coefs': coefs,
