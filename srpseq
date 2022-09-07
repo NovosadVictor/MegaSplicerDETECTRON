@@ -22,10 +22,10 @@ def file(file_name):
     return os.path.abspath(file_name)
 
 
-tool_name = 'detectron'
+tool_name = 'srpseq'
 
 
-class MegaSplicerDetectron(object):
+class SRPseq(object):
     def __init__(self):
         # Create new parser of script arguments
         parser = argparse.ArgumentParser(
@@ -127,4 +127,4 @@ class MegaSplicerDetectron(object):
 
 
 if __name__ == '__main__':
-    MegaSplicerDetectron()
+    SRPseq()

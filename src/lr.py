@@ -48,7 +48,7 @@ def elastic_net(train, alpha=np.power(2.0, range(-5, 2)), l1_ratio=[1, 0.5, 0.1]
         param_grid={'alpha': alpha, 'l1_ratio': l1_ratio},
         scoring=custom_scorer,
     )
-    cv.fit(train_X, train_Y, sample_weight=train_['Freq'])
+    cv.fit(train_X, train_Y, sample_weight=train_['Freq'] if 'Freq' in train_.columns else None)
     model = cv.best_estimator_
     significant_inds = model.coef_ != 0
     cols, train_X, train_Y = prepare_model_data(train_[set(list(np.array(cols)[significant_inds])+muted_columns)&set(train_.columns)], is_numpy=False)
