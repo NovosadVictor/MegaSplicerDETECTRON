@@ -43,7 +43,7 @@ def elastic_net(train, alpha=np.power(2.0, range(-5, 2)), l1_ratio=[1, 0.5, 0.1]
     custom_scorer = custom_score_grouped(train_.groupby(by='Tissue'))
 
     cv = GridSearchCV(
-        estimator=ElasticNet(random_state=0, **kwargs),
+        estimator=ElasticNet(random_state=0),
         cv=2,
         param_grid={'alpha': alpha, 'l1_ratio': l1_ratio},
         scoring=custom_scorer,
@@ -51,7 +51,7 @@ def elastic_net(train, alpha=np.power(2.0, range(-5, 2)), l1_ratio=[1, 0.5, 0.1]
     cv.fit(train_X, train_Y, sample_weight=train_['Freq'])
     model = cv.best_estimator_
     significant_inds = model.coef_ != 0
-    cols, train_X, train_Y = prepare_model_data(train_[list(np.array(cols)[significant_inds])+muted_columns], is_numpy=False)
+    cols, train_X, train_Y = prepare_model_data(train_[set(list(np.array(cols)[significant_inds])+muted_columns)&set(train_.columns)], is_numpy=False)
 
     if not cols:
         coefs = pd.DataFrame({'(Intercept)': {'Estimate': model.intercept_, 'p-value': 0}}).T

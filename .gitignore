@@ -2,4 +2,13 @@
 **.idea**
 **.pyc
 **.DS_Store**
-
+runs
+configs
+data
+*.csv
+local
+output
+build
+dist
+SRPseq.egg-info
+Makefile

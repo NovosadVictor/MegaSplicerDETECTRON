@@ -24,7 +24,6 @@ def get_accuracy(model, df, is_numpy=False):
         predictions = model.predict(df_np)
         cor = pearsonr(predictions, logit(df['fraq']))[0]
         r2 = r2_score(predictions, logit(df['fraq']))
-        print(df.iloc[0]['Tissue'], cor)
     mann_w = mannwhitneyu(inlogit(predictions), df['fraq'])[1]
     #
     mean_pred, mean_true = np.median(inlogit(predictions)), np.median(df['fraq'])
