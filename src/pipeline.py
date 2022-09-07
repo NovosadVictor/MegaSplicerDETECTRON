@@ -44,13 +44,13 @@ class Pipeline:
                     res = elastic_net(df)
                     node.res = res
                     if self.tissue_specific:
-node.tissue_res = {}
-for tissue in set(df['Tissue']):
-    print(tissue)
-    tissue_df = df[df['Tissue'] == tissue]
-    tissue_df['Freq'] = 1
-    res = elastic_net(tissue_df)
-    node.tissue_res[tissue] = res
+                        node.tissue_res = {}
+                        for tissue in set(df['Tissue']):
+                            print(tissue)
+                            tissue_df = df[df['Tissue'] == tissue]
+                            tissue_df['Freq'] = 1
+                            res = elastic_net(tissue_df)
+                            node.tissue_res[tissue] = res
 
             cur_nodes = []
             for node in nodes:
