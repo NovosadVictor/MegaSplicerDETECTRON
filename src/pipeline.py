@@ -46,6 +46,7 @@ class Pipeline:
                     if self.tissue_specific:
                         node.tissue_res = {}
                         for tissue in set(df['Tissue']):
+                            print(tissue)
                             tissue_df = df[df['Tissue'] == tissue]
                             tissue_df['Freq'] = 1
                             res = elastic_net(tissue_df)
