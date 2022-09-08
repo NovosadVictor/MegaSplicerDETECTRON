@@ -7,8 +7,8 @@ class TranscriptsTreeNode:
         self.right_child = None
         self.node_id = None
         self.df = None
-        self.res = None
-        self.tissue_res = None
+        self.res = {}
+        self.tissue_res = {}
 
     def set_children(self, left=None, right=None):
         self.left_child = left
