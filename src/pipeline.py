@@ -129,6 +129,7 @@ class Pipeline:
                     'validation': val_acc,
                 }
                 for tissue in getattr(parent, 'tissue_res', {}):
+                    print(tissue, parent.tissue_res[tissue]['predictions.train'], parent.df.loc[self.train_index].query(f'Tissue == "{tissue}"')['fraq'])
                     train_acc = get_scores(parent.tissue_res[tissue]['predictions.train'], parent.df.loc[self.train_index].query(f'Tissue == "{tissue}"')['fraq'])
                     val_acc = get_scores(parent.tissue_res[tissue]['predictions.validation'], parent.df.loc[self.val_index].query(f'Tissue == "{tissue}"')['fraq'])
                     parent.tissue_res[tissue]['accuracy'] = {

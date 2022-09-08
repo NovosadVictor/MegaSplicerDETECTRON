@@ -117,15 +117,19 @@ def make_exons_sf_df(gene_data, sfs_df, isoforms_df, gene_exon_motifs):
 
     nodes = [transcripts_tree.left_child, transcripts_tree.right_child]
     while len(nodes):
-        for node in nodes[::2]:
-            parent_transcripts = node.parent.kwargs
-            node_transcripts = node.kwargs
-            node.df = make_exon_sf_df(
-                sfs_df, isoforms_df, gene_exon_motifs,
-                node.divider_exon,
-                [t['transcript_id'] for t in node_transcripts],
-                [t['transcript_id'] for t in parent_transcripts],
-            )
+        for node_id, node in enumerate(nodes):
+            if node_id % 2 == 0:
+                parent_transcripts = node.parent.kwargs
+                node_transcripts = node.kwargs
+                node.df = make_exon_sf_df(
+                    sfs_df, isoforms_df, gene_exon_motifs,
+                    node.divider_exon,
+                    [t['transcript_id'] for t in node_transcripts],
+                    [t['transcript_id'] for t in parent_transcripts],
+                )
+            else:
+                node.df = nodes[node_id - 1].df
+                node.df['fraq'] = 1 - node.df['fraq']
 
         cur_nodes = []
         for node in nodes:
