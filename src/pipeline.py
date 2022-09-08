@@ -122,6 +122,7 @@ class Pipeline:
         while len(parents):
             cur_parents = []
             for node_id, parent in enumerate(parents):
+                print(parent.res['predictions.train'], parent.df.loc[self.train_index]['fraq'])
                 train_acc = get_scores(parent.res['predictions.train'], parent.df.loc[self.train_index]['fraq'])
                 val_acc = get_scores(parent.res['predictions.validation'], parent.df.loc[self.val_index]['fraq'])
                 parent.res['accuracy'] = {
