@@ -51,7 +51,6 @@ class Pipeline:
                             tissue_df['Freq'] = 1
                             res = elastic_net(tissue_df)
                             node.tissue_res[tissue] = res
-
             cur_nodes = []
             for node in nodes:
                 if node.left_child is not None:
@@ -103,12 +102,12 @@ class Pipeline:
                         parent.tissue_res[tissue]['predictions.train'] = 1 - parents[node_id - 1].tissue_res[tissue]['predictions.train']
                         parent.tissue_res[tissue]['predictions.validation'] = 1 - parents[node_id - 1].tissue_res[tissue]['predictions.validation']
 
-                parent.res['predictions.train.accumulative'] = parent.parent.res.get('predictions.train.accumulative', 1) * parent.res['predictions.train']
-                parent.res['predictions.validation.accumulative'] = parent.parent.res.get('predictions.validation.accumulative', 1) * parent.res['validation.validation']
+                parent.res['predictions.train.accumulative'] = (parent.parent.res or {}).get('predictions.train.accumulative', 1) * parent.res['predictions.train']
+                parent.res['predictions.validation.accumulative'] = (parent.parent.res or {}).get('predictions.validation.accumulative', 1) * parent.res['validation.validation']
 
                 for tissue in getattr(parent, 'tissue_res', {}):
-                    parent.tissue_res[tissue]['predictions.train.accumulative'] = parent.parent.tissue_res[tissue].get('predictions.train.accumulative', 1) * parent.tissue_res[tissue]['predictions.train']
-                    parent.tissue_res[tissue]['predictions.validation.accumulative'] = parent.parent.tissue_res[tissue].get('predictions.validation.accumulative', 1) * parent.tissue_res[tissue]['predictions.validation']
+                    parent.tissue_res[tissue]['predictions.train.accumulative'] = (parent.parent.tissue_res[tissue] or {}).get('predictions.train.accumulative', 1) * parent.tissue_res[tissue]['predictions.train']
+                    parent.tissue_res[tissue]['predictions.validation.accumulative'] = (parent.parent.tissue_res[tissue] or {}).get('predictions.validation.accumulative', 1) * parent.tissue_res[tissue]['predictions.validation']
 
                 if parent.left_child is not None:
                     cur_parents += [parent.left_child, parent.right_child]
