@@ -103,7 +103,7 @@ class Pipeline:
                         parent.tissue_res[tissue]['predictions.validation'] = 1 - parents[node_id - 1].tissue_res[tissue]['predictions.validation']
 
                 parent.res['predictions.train.accumulative'] = (parent.parent.res or {}).get('predictions.train.accumulative', 1) * parent.res['predictions.train']
-                parent.res['predictions.validation.accumulative'] = (parent.parent.res or {}).get('predictions.validation.accumulative', 1) * parent.res['validation.validation']
+                parent.res['predictions.validation.accumulative'] = (parent.parent.res or {}).get('predictions.validation.accumulative', 1) * parent.res['predictions.validation']
 
                 for tissue in getattr(parent, 'tissue_res', {}):
                     parent.tissue_res[tissue]['predictions.train.accumulative'] = (parent.parent.tissue_res[tissue] or {}).get('predictions.train.accumulative', 1) * parent.tissue_res[tissue]['predictions.train']
