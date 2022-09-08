@@ -122,15 +122,15 @@ class Pipeline:
         while len(parents):
             cur_parents = []
             for node_id, parent in enumerate(parents):
-                train_acc = get_scores(parent.res['predictions.train'], parent.df.loc[self.train_index])
-                val_acc = get_scores(parent.res['predictions.validation'], parent.df.loc[self.val_index])
+                train_acc = get_scores(parent.res['predictions.train'], parent.df.loc[self.train_index]['fraq'])
+                val_acc = get_scores(parent.res['predictions.validation'], parent.df.loc[self.val_index]['fraq'])
                 parent.res['accuracy'] = {
                     'train': train_acc,
                     'validation': val_acc,
                 }
                 for tissue in getattr(parent, 'tissue_res', {}):
-                    train_acc = get_scores(parent.tissue_res[tissue]['predictions.train'], parent.df.loc[self.train_index].query(f'Tissue == "{tissue}"'))
-                    val_acc = get_scores(parent.tissue_res[tissue]['predictions.validation'], parent.df.loc[self.val_index].query(f'Tissue == "{tissue}"'))
+                    train_acc = get_scores(parent.tissue_res[tissue]['predictions.train'], parent.df.loc[self.train_index].query(f'Tissue == "{tissue}"')['fraq'])
+                    val_acc = get_scores(parent.tissue_res[tissue]['predictions.validation'], parent.df.loc[self.val_index].query(f'Tissue == "{tissue}"')['fraq'])
                     parent.tissue_res[tissue]['accuracy'] = {
                         'train': train_acc,
                         'validation': val_acc,
