@@ -199,4 +199,4 @@ class Pipeline:
             ax.set_ylim(0, 1)
             plt.grid(visible=True)
             plt.tight_layout()
-            plt.show()
+            plt.savefig(f"{self.config['output_dir']}/{score}.png", dpi=300)
