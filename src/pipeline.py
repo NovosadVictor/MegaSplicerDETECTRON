@@ -106,8 +106,8 @@ class Pipeline:
                 parent.res['predictions.validation.accumulative'] = (parent.parent.res or {}).get('predictions.validation.accumulative', 1) * parent.res['predictions.validation']
 
                 for tissue in getattr(parent, 'tissue_res', {}):
-                    parent.tissue_res[tissue]['predictions.train.accumulative'] = (parent.parent.tissue_res[tissue] or {}).get('predictions.train.accumulative', 1) * parent.tissue_res[tissue]['predictions.train']
-                    parent.tissue_res[tissue]['predictions.validation.accumulative'] = (parent.parent.tissue_res[tissue] or {}).get('predictions.validation.accumulative', 1) * parent.tissue_res[tissue]['predictions.validation']
+                    parent.tissue_res[tissue]['predictions.train.accumulative'] = (parent.parent.tissue_res or {}).get(tissue, {}).get('predictions.train.accumulative', 1) * parent.tissue_res[tissue]['predictions.train']
+                    parent.tissue_res[tissue]['predictions.validation.accumulative'] = (parent.parent.tissue_res or {}).get(tissue, {}).get('predictions.validation.accumulative', 1) * parent.tissue_res[tissue]['predictions.validation']
 
                 if parent.left_child is not None:
                     cur_parents += [parent.left_child, parent.right_child]
