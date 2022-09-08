@@ -63,13 +63,24 @@ def get_accuracy(coefs, df):
 
 
 def get_scores(pred, true):
-    cor = pearsonr(pred, logit(true))[0]
-    r2 = max(0, r2_score(pred, logit(true)))
-    mann_w = mannwhitneyu(inlogit(pred), true)[1]
-    #
-    mean_pred, mean_true = np.median(inlogit(pred)), np.median(true)
-    uplift = (mean_pred - mean_true) / mean_true
-    uplift_score = max(0, 1 - abs(uplift))
+    nans = pred.isna() | true.isna()
+    pred, true = pred[~nans], true[~nans]
+    if pred.empty:
+        cor = 0
+        r2 = 0
+        mann_w = 0
+        mean_pred = 0
+        mean_true = 0
+        uplift = 1
+        uplift_score = 0
+    else:
+        cor = pearsonr(pred, logit(true))[0]
+        r2 = max(0, r2_score(pred, logit(true)))
+        mann_w = mannwhitneyu(inlogit(pred), true)[1]
+        #
+        mean_pred, mean_true = np.median(inlogit(pred)), np.median(true)
+        uplift = (mean_pred - mean_true) / mean_true
+        uplift_score = max(0, 1 - abs(uplift))
     #
     return {
         'cor': cor,

@@ -51,7 +51,150 @@ Make sure you have installed all of the following prerequisites on your developm
 
 ## Step 1: data preparation
 
+Before running the tool, you should prepare optional two tsv tables containing expression data of RNA-binding proteins (or all genes expression levels), expression levels of considered gene isoforms and a table with RNA-binding proteins motifs. RNA-seq tables should contain log2 transformed FPKM values associated with samples (rows) and genes / isoforms (columns):
+
+<details>
+  <summary>Example</summary>
+  
+  |            | RBP_1 | RBP_2 |
+  | ---------- | --------- | --------- |
+  | Sample 1   | 17.17     | 365.1     |
+  | Sample 2   | 56.99     | 123.9     |
+  | ...        |           |           |
+  | Sample 98  | 22.22     | 123.4     |
+  | Sample 99  | 23.23     | 567.8     |
+  | ...        |           |           |
+  | Sample 511 | 10.82     | 665.8     |
+  | Sample 512 | 11.11     | 200.2     |
+</details>
+
+
+Annotation table format is different for classification and survival analysis. For classification it should contain binary indicator of sample class (e.g., 1 for recurrent tumor and 0 for non-recurrent), dataset (batch) label and dataset type (Training/Filtration/Validation).  
+It is important that `Class = 1` represents "Positives" and `Class = 0` are "negatives", otherwise accuracy scores may be calculated incorrectly.   
+Note that annotation should be present for each sample listed in the data table in the same order:
+
+<details>
+  <summary>Example</summary>
+  
+  |            | Class | Dataset  | Dataset type |
+  | ---------- | ----- | -------- | ------------ |
+  | Sample 1   | 1     | GSE3494  | Training     |
+  | Sample 2   | 0     | GSE3494  | Training     |
+  | ...        |       |          |              |
+  | Sample 98  | 0     | GSE12093 | Filtration   |
+  | Sample 99  | 0     | GSE12093 | Filtration   |
+  | ...        |       |          |              |
+  | Sample 511 | 1     | GSE1456  | Validation   |
+  | Sample 512 | 1     | GSE1456  | Validation   |
+</details>
+
+
+For survival analysis, annotation table should contain binary event indicator and time to event:
+<details>
+  <summary>Example</summary>
+  
+  |            | Event | Time to event | Dataset  | Dataset type |
+  | ---------- | ----- | ------------- | -------- | ------------ |
+  | Sample 1   | 1     | 100.1         | GSE3494  | Training     |
+  | Sample 2   | 0     | 500.2         | GSE3494  | Training     |
+  | ...        |       |               |          |              |
+  | Sample 98  | 0     | 623.9         | GSE12093 | Filtration   |
+  | Sample 99  | 0     | 717.1         | GSE12093 | Filtration   |
+  | ...        |       |               |          |              |
+  | Sample 511 | 1     | 40.5          | GSE1456  | Validation   |
+  | Sample 512 | 1     | 66.7          | GSE1456  | Validation   |
+</details>
+
+
+Table with *n* / *k* grid for exhaustive feature selection:  
+*n* is a number of selected features, *k* is a length of each features subset.  
+
+If you are not sure what values for *n* *k* to use, see [Step 3: defining a *n*, *k* grid](#step-3-defining-a-n-k-grid)  
+
+<details>
+  <summary>Example</summary> 
+   
+  | n   | k   |  
+  | --- | --- |  
+  | 100 | 1   |  
+  | 100 | 2   |  
+  | ... | ... |  
+  | 20  | 5   |  
+  | 20  | 10  |  
+  | 20  | 15  |  
+</details>
+
+
 ## Step 2: creating configuration file
+
+Configuration file is a json file containing all customizable parameters for the model (classification and survival analysis)  
+
+<details>
+  <summary>Available parameters</summary> 
+
+  🔴!NOTE! - All paths to files / directories can be either relative to the configuration file directory or absolute paths 
+  * `data_path`
+      Path to csv table of the data.
+
+  * `annotation_path`
+      Path to csv table of the data annotation.
+
+  * `n_k_path`
+      Path to a *n*/*k* grid file.
+
+  * `output_dir`
+      Path to directory for output files. If it doesn't exist, it will be created.
+
+  * `feature_pre_selector`  
+      Name of feature pre-selection function from [feature pre-selectors section](#functions-and-classes).
+
+  * `feature_pre_selector_kwargs`  
+      Object/Dictionary of keyword arguments for feature pre-selector function.
+
+  * `feature_selector`  
+      Name of feature selection function from [feature selectors section](#functions-and-classes).
+
+  * `feature_selector_kwargs`  
+      Object/Dictionary of keyword arguments for feature selector function. Boolean `use_filtration` indicates whether to use *Filtration* dataset besides *Training* dataset for the selector function.
+
+  * `preprocessor`
+      Name of class for data preprocessing from [sklearn.preprocessing](https://scikit-learn.org/stable/modules/preprocessing.html).
+
+  * `preprocessor_kwargs`
+      Object/Dictionary of keyword arguments for preprocessor class initialization.  
+      If you are using `sklearn` model, use `kwargs` parameters from the documentation of the model.
+
+  * `model`  
+      Name of class for classification / survival analysis from [Classifiers / Regressors section](#functions-and-classes).
+
+  * `model_kwargs`
+      Object/Dictionary of keyword arguments for model initialization.  
+      If you are using `sklearn` model, use `kwargs` parameters from the documentation of the model.
+
+  * `model_CV_ranges`
+      Object/Dictionary defining model parameters which should be cross-validated. Keys are parameter names, values are lists for grid search.
+
+  * `model_CV_folds`
+      Number of folds for K-Folds cross-validation.
+
+  * `scoring_functions`
+      List with names for scoring functions (from [Accuracy scores section](#functions-and-classes)) which will be calculated for each model. If you need to pass parameters to the function (e.g. `year` in dynamic auc score), you can use object {"name": `function name`, "kwargs": `parameters object`}.
+
+  * `main_scoring_function`
+      Key from scoring_functions dict defining the "main" scoring function which will be optimized during cross-validation and will be used for model filtering.
+
+  * `main_scoring_threshold`
+      A number defining threshold for model filtering: models with score below this threshold on training/filtration sets will not be further evaluated.
+
+  * `n_processes`
+      Number of processes / threads to run on.
+  
+  * `random_state`
+      Random seed (set to an arbitrary integer for reproducibility).
+
+  * `verbose`
+      If *true*, print running time for each pair of *n*, *k*.
+</details>
 
 ## Step 3: running the pipeline
 
