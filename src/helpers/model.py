@@ -42,4 +42,5 @@ def get_accuracy(model, df, is_numpy=False):
 
 
 def remove_outliers(df, tr=5):
+    df = df[~df['fraq'].isna()]
     return df[np.abs(zscore(df['fraq'])) < tr]

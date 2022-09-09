@@ -29,33 +29,33 @@ class Pipeline:
             self.train_index, self.val_index = train_test_split(self.rbp_df.index, test_size=.25, stratify=stratify)
 
     def run(self):
-        exons_motifs = map_motifs_to_exons(self.gene_data, self.rbps)
-        tree = make_exons_sf_df(
-            self.gene_data,
-            self.rbp_df, self.isoforms_df,
-            gene_exon_motifs=exons_motifs,
-        )
+exons_motifs = map_motifs_to_exons(self.gene_data, self.rbps)
+tree = make_exons_sf_df(
+    self.gene_data,
+    self.rbp_df, self.isoforms_df,
+    gene_exon_motifs=exons_motifs,
+)
 
-        nodes = [tree.left_child, tree.right_child]
-        while len(nodes):
-            for node in nodes[::2]:
-                df = node.df.loc[self.train_index]
-                if len(df.columns) > 2:
-                    res = elastic_net(df)
-                    node.res = res
-                    if self.tissue_specific:
-                        node.tissue_res = {}
-                        for tissue in set(df['Tissue']):
-                            print(tissue)
-                            tissue_df = df[df['Tissue'] == tissue]
-                            tissue_df['Freq'] = 1
-                            res = elastic_net(tissue_df)
-                            node.tissue_res[tissue] = res
-            cur_nodes = []
-            for node in nodes:
-                if node.left_child is not None:
-                    cur_nodes += [node.left_child, node.right_child]
-            nodes = cur_nodes
+nodes = [tree.left_child, tree.right_child]
+while len(nodes):
+    for node in nodes[::2]:
+        df = node.df.loc[self.train_index]
+        if len(df.columns) > 2:
+            res = elastic_net(df)
+            node.res = res
+            if self.tissue_specific:
+                node.tissue_res = {}
+                for tissue in set(df['Tissue']):
+                    print(tissue)
+                    tissue_df = df[df['Tissue'] == tissue]
+                    tissue_df['Freq'] = 1
+                    res = elastic_net(tissue_df)
+                    node.tissue_res[tissue] = res
+    cur_nodes = []
+    for node in nodes:
+        if node.left_child is not None:
+            cur_nodes += [node.left_child, node.right_child]
+    nodes = cur_nodes
 
         with open(f'{self.config["output_dir"]}/pipeline.wb', 'wb') as res_file:
             pickle.dump(self, res_file)
