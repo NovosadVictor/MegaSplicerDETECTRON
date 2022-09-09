@@ -61,12 +61,12 @@ class Pipeline:
             pickle.dump(self, res_file)
 
         plot_gene_isoforms(self.gene_data, output_dir=self.config['output_dir'])
-        plot_isoforms_tree(tree, output_dir=self.config['output_dir'])
 
         self.tree = tree
         self.predict()
         self.accuracy()
         self.plot()
+        plot_isoforms_tree(tree, output_dir=self.config['output_dir'])
 
     @staticmethod
     def load_from_file(path_to_file):

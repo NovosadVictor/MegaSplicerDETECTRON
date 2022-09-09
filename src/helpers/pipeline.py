@@ -128,7 +128,7 @@ def make_exons_sf_df(gene_data, sfs_df, isoforms_df, gene_exon_motifs):
                     [t['transcript_id'] for t in parent_transcripts],
                 )
             else:
-                node.df = nodes[node_id - 1].df
+                node.df = nodes[node_id - 1].df.copy()
                 node.df['fraq'] = 1 - node.df['fraq']
 
         cur_nodes = []
