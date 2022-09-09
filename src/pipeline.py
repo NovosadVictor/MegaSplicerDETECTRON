@@ -82,17 +82,19 @@ class Pipeline:
             cur_parents = []
             for node_id, parent in enumerate(parents):
                 if node_id % 2 == 0:
-                    parent.res['predictions.train'] = predict(parent.df.loc[self.train_index], parent.res['coefs'])
-                    parent.res['predictions.validation'] = predict(parent.df.loc[self.val_index], parent.res['coefs'])
+                    parent.res['predictions.train'] = predict(parent.df.loc[self.train_index], parent.res['coefs'], logit=False)
+                    parent.res['predictions.validation'] = predict(parent.df.loc[self.val_index], parent.res['coefs'], logit=False)
 
                     for tissue in getattr(parent, 'tissue_res', {}):
                         parent.tissue_res[tissue]['predictions.train'] = predict(
                             parent.df.loc[self.train_index].query(f'Tissue == "{tissue}"'),
                             parent.tissue_res[tissue]['coefs'],
+                            logit=False,
                         )
                         parent.tissue_res[tissue]['predictions.validation'] = predict(
                             parent.df.loc[self.val_index].query(f'Tissue == "{tissue}"'),
                             parent.tissue_res[tissue]['coefs'],
+                            logit=False,
                         )
                 else:
                     parent.res['predictions.train'] = 1 - parents[node_id - 1].res['predictions.train']
