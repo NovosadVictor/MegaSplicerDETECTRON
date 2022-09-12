@@ -1,4 +1,5 @@
 import pickle
+import json
 import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -6,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from src.helpers.pipeline import map_motifs_to_exons, make_exons_sf_df
 from src.helpers.plots import plot_isoforms_tree, plot_gene_isoforms
 from src.lr import elastic_net
-from src.utils.common import predict, get_accuracy, get_scores, add_freq_to_df
+from src.utils.common import predict, get_scores, add_freq_to_df, make_sure_dir_exists
 
 
 class Pipeline:
@@ -66,6 +67,7 @@ class Pipeline:
         self.predict()
         self.accuracy()
         self.plot()
+        self.save_res()
         plot_isoforms_tree(tree, output_dir=self.config['output_dir'])
 
     @staticmethod
@@ -202,3 +204,31 @@ class Pipeline:
             plt.grid(visible=True)
             plt.tight_layout()
             plt.savefig(f"{self.config['output_dir']}/{score}.png", dpi=300)
+
+    @staticmethod
+    def save_res_(node, path):
+        if node is not None:
+            make_sure_dir_exists(path)
+            node.res['coefs'].to_csv(f'{path}/coefs.tsv', sep='\t')
+            node.df.to_csv(f'{path}/df.tsv', sep='\t')
+            with open(f'{path}/transcripts.json', 'w') as f:
+                json.dump({
+                    'transcripts': {
+                        'parent': [t['transcript_id'] for t in node.parent.kwargs] if node.parent is not None else [],
+                        'node': [t['transcript_id'] for t in node.kwargs],
+                    },
+                    'divider_exon': node.divider_exon,
+                }, f)
+
+            for tissue in getattr(node, 'tissue_res', {}):
+                make_sure_dir_exists(f'{path}/by_tissue/{tissue}/')
+                node.tissue_res[tissue]['coefs'].to_csv(f'{path}/by_tissue/{tissue}/coefs.tsv', sep='\t')
+
+            Pipeline.save_res_(node.left_child, path=f'{path}/left/')
+            Pipeline.save_res_(node.right_child, path=f'{path}/right/')
+
+    def save_res(self):
+        if self.tree is None:
+            return
+
+        self.save_res_(self.tree, path=f"{self.config['output_path']}/tree/")
