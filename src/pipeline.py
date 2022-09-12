@@ -210,7 +210,7 @@ class Pipeline:
         if node is not None:
             make_sure_dir_exists(path)
             if node.res:
-                if node.res.get('coefs'):
+                if node.res.get('coefs') is not None:
                     node.res['coefs'].to_csv(f'{path}/coefs.tsv', sep='\t')
                 node.df.to_csv(f'{path}/df.tsv', sep='\t')
                 with open(f'{path}/transcripts.json', 'w') as f:
