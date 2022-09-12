@@ -209,20 +209,21 @@ class Pipeline:
     def save_res_(node, path):
         if node is not None:
             make_sure_dir_exists(path)
-            node.res['coefs'].to_csv(f'{path}/coefs.tsv', sep='\t')
-            node.df.to_csv(f'{path}/df.tsv', sep='\t')
-            with open(f'{path}/transcripts.json', 'w') as f:
-                json.dump({
-                    'transcripts': {
-                        'parent': [t['transcript_id'] for t in node.parent.kwargs] if node.parent is not None else [],
-                        'node': [t['transcript_id'] for t in node.kwargs],
-                    },
-                    'divider_exon': node.divider_exon,
-                }, f)
+            if node.res:
+                node.res['coefs'].to_csv(f'{path}/coefs.tsv', sep='\t')
+                node.df.to_csv(f'{path}/df.tsv', sep='\t')
+                with open(f'{path}/transcripts.json', 'w') as f:
+                    json.dump({
+                        'transcripts': {
+                            'parent': [t['transcript_id'] for t in node.parent.kwargs] if node.parent is not None else [],
+                            'node': [t['transcript_id'] for t in node.kwargs],
+                        },
+                        'divider_exon': node.divider_exon,
+                    }, f)
 
-            for tissue in getattr(node, 'tissue_res', {}):
-                make_sure_dir_exists(f'{path}/by_tissue/{tissue}/')
-                node.tissue_res[tissue]['coefs'].to_csv(f'{path}/by_tissue/{tissue}/coefs.tsv', sep='\t')
+                for tissue in getattr(node, 'tissue_res', {}):
+                    make_sure_dir_exists(f'{path}/by_tissue/{tissue}/')
+                    node.tissue_res[tissue]['coefs'].to_csv(f'{path}/by_tissue/{tissue}/coefs.tsv', sep='\t')
 
             Pipeline.save_res_(node.left_child, path=f'{path}/left/')
             Pipeline.save_res_(node.right_child, path=f'{path}/right/')
