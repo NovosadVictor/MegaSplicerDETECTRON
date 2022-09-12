@@ -231,4 +231,4 @@ class Pipeline:
         if self.tree is None:
             return
 
-        self.save_res_(self.tree, path=f"{self.config['output_path']}/tree/")
+        self.save_res_(self.tree, path=f"{self.config['output_dir']}/tree/")
