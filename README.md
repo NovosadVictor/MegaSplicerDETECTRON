@@ -61,11 +61,11 @@ Before running the tool, you should prepare optional two tsv tables containing e
   | Sample 1   | 17.17     | 365.1     | TCGA-COAD | Training       |
   | Sample 2   | 56.99     | 123.9     | TCGA-COAD | Validation     |
   | ...        |           |           |           |                |
-  | Sample 98  | 22.22     | 123.4     |           |                |
-  | Sample 99  | 23.23     | 567.8     | | |
+  | Sample 98  | 22.22     | 123.4     | TCGA-BRCA | Training       |
+  | Sample 99  | 23.23     | 567.8     | TCGA-BRCA | Training       |
   | ...        |           |           | | |
-  | Sample 511 | 10.82     | 665.8     | | |
-  | Sample 512 | 11.11     | 200.2     | | |
+  | Sample 511 | 10.82     | 665.8     | TCGA-READ | Validation     |
+  | Sample 512 | 11.11     | 200.2     | TCGA-READ | Validation     |
 </details>
 
 
@@ -91,31 +91,31 @@ Configuration file is a json file containing all customizable parameters for the
 
   🔴!NOTE! - All paths to files / directories can be either relative to the configuration file directory or absolute paths 
   * `rbp_data_path`
-      Path to csv table of the data.
+      Optional path to a tsv table containing expression levels of RBPs (by default, combined [TCGA](https://doi.org/10.1038%2Fng.2764) dataset is used).
 
   * `isoforms_data_path`
-      Path to csv table of the data annotation.
+      Optional path to a tsv table containing expression levels of selected gene isoforms (by default, combined [TCGA](https://doi.org/10.1038%2Fng.2764) dataset is used).
 
   * `rbps_path`
-      Path to a *n*/*k* grid file.
+      Optional path to a tsv table containing list of RBPs and their motifs (by default, [Attract](https://doi.org/10.1093/database/baw035) and [SpliceAid-F](https://doi.org/10.1093/nar/gks997) datasets are used).
 
   * `output_dir`
       Path to directory for output files. If it doesn't exist, it will be created.
 
   * `gene`  
-      Name of feature pre-selection function from [feature pre-selectors section](#functions-and-classes).
+      Gene name for splicing analysis
 
   * `rbps_tresh_mean`  
-      Object/Dictionary of keyword arguments for feature pre-selector function.
+      Optional threshold value for expression median of RBPs for them to be considered in the analysis (RBPs with the median expression value lowe than the specified threshold are excluded).
 
   * `rbps_tresh_var`  
-      Name of feature selection function from [feature selectors section](#functions-and-classes).
+      Optional threshold value for expression variance of RBPs for them to be considered in the analysis (RBPs with the expression variance lowe than the specified threshold are excluded).
 
   * `isoforms_tresh_mean`  
-      Object/Dictionary of keyword arguments for feature selector function. Boolean `use_filtration` indicates whether to use *Filtration* dataset besides *Training* dataset for the selector function.
+      Optional threshold value for expression median of isoforms for them to be considered in the analysis (isoforms with the median expression value lowe than the specified threshold are excluded).
 
   * `isoforms_tresh_var`
-      Name of class for data preprocessing from [sklearn.preprocessing](https://scikit-learn.org/stable/modules/preprocessing.html).
+      Optional threshold value for expression variance of isoforms for them to be considered in the analysis (isoforms with the expression variance lowe than the specified threshold are excluded).
 
   * `n_processes`
       Number of processes / threads to run on.
@@ -123,8 +123,6 @@ Configuration file is a json file containing all customizable parameters for the
   * `random_state`
       Random seed (set to an arbitrary integer for reproducibility).
 
-  * `verbose`
-      If *true*, print running time for each pair of *n*, *k*.
 </details>
 
 ## Step 3: running the pipeline
