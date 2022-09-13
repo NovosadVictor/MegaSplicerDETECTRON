@@ -127,7 +127,28 @@ Configuration file is a json file containing all customizable parameters for the
 
 ## Step 3: running the pipeline
 
-## Step 4: generating report
+When input data and configuration file are ready,  
+the  pipeline can be executed as follows -  
+```bash
+srpseq build -c <config_file>
+```
+
+
+This will generate multiple files and directory in the specified output folder:
+* `isoforms_tree.png`: this file contains all models (classifiers or regressors) which passed the filtration together with their quality metrics.
+* `{gene}_isoforms.png`: for each pair of *n*, *k* three numbers are given: number of models which passed the filtration,
+number of models which showed reliable performance (i.e., passed quality thresholds) on the validation set and
+their ratio (in %). Low percentage of validation-reliable models together with high number of 
+filtration-reliable models is usually associated with overfitting.
+* `{score}.png`: for each pair (n, k), for each feature, percentage of models carrying this feature
+* `tree`: for each pair (n, k), for each feature, percentage of models carrying this feature 
+  * `transcirpts.json`: for each pair (n, k), for each feature, percentage of models carrying this feature 
+  * `scores.json`: for each pair (n, k), for each feature, percentage of models carrying this feature
+  * `coefs.csv`: for each pair (n, k), for each feature, percentage of models carrying this feature 
+  * `df.csv`: for each pair (n, k), for each feature, percentage of models carrying this feature 
+  * `left`: for each pair (n, k), for each feature, percentage of models carrying this feature 
+  * `right`: for each pair (n, k), for each feature, percentage of models carrying this feature 
+  is listed (only models which passed the filtration are considered).
 
 
 # Functions and classes
