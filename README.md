@@ -13,7 +13,7 @@ Nersisyan S, Novosad V, Tonevitsky A. SRPseq: Splicing Regulation Prediction fro
 [Functions and classes](#functions-and-classes)  
 
 # Introduction
-<img align="right" width="400px" src="https:https://github.com/NovosadVictor/SRPseq/static/flowchart.png?raw=true">
+<img align="right" width="400px" src="https://github.com/NovosadVictor/SRPseq/blob/dev/static/flowchart.png?raw=true">
 <div>
 <p>In general words, the core idea of our approach consists in the sequentiality of the splicing process. Specifically, by focusing on a single pre-RNA of a certain gene, our aim is to model the splicing process as a set of specific steps where each step is dependent on the previous steps and the “environment” of the current step. In particular, we assign each step to the spliceosome decision on whether to include or to exclude a considered exon. Importantly, each step has its probability which depends on the previously included/excluded exons and the expression levels of splicing factors related to the considered exon. The latter means that it is believed that if the splicing factor is an enhancer for a specific exon in a specific tissue, then the higher its expression the higher the probability of the exon inclusion, and otherwise for the silencing splicing factors. Briefly, a pipeline is implemented as follows:</p>
 <ol>
