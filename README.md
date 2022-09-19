@@ -10,7 +10,6 @@ Nersisyan S, Novosad V, Tonevitsky A. SRPseq: Splicing Regulation Prediction fro
 [Installation](#installation)  
 [Tutorial](#tutorial)  
 [Running SRPseq](#running-srpseq)  
-[Functions and classes](#functions-and-classes)  
 
 # Introduction
 <img align="right" width="400px" src="https://github.com/NovosadVictor/SRPseq/blob/dev/static/flowchart.png?raw=true">
@@ -46,6 +45,50 @@ Make sure you have installed all of the following prerequisites on your developm
 
 # Tutorial
 
+In this section we illustrate the main functionality of SRPseq, and
+together with that show how to reproduce the results present in 
+the manuscript.
+
+<details>
+  <summary>The CD44 example</summary>
+  
+  We illustrate SRPseq basics by using the CD44 gene isoforms, default TCGA and the default Attract + SpliceAid-F datasets. All necessary data for this example can be found in [`tutorial/CD44`](https://github.com/NovosadVictor/SRPseq/blob/main/tutorial/CD44) directory.  
+ 
+  Configuration and output files for this example are
+  located in [`tutorial/CD44`](https://github.com/NovosadVictor/SRPseq/blob/main/tutorial/CD44) folder, input data can be downloaded [here](https://eduhseru-my.sharepoint.com/:f:/g/personal/snersisyan_hse_ru/EihEOok4stJFnCjGxqL14qgBSqxLzUy7hBThWp4_jE3HKw?e=bges1q). The microarray data are split into independent training, filtration and validation sets.
+ 
+  The only `"gene": "CD44"` and `"tissue_specific": true` option was used in ([`config.json`](https://github.com/NovosadVictor/SRPseq/blob/main/tutorial/CD44/config.json)):
+  
+  `srpseq build -c {path_to_config.json}`
+
+  Here we review the results:
+  
+  - [`CD44_isoforms.png`](https://github.com/NovosadVictor/SRPseq/blob/main/tutorial/CD44/results/CD44_isoforms.png)
+  
+  7 of 8 CD44 isoforms were used for the analysis.
+  The structure of these isoforms, constant and variable exons are shown in the image.
+  
+  - [`isoforms_tree.png`](https://github.com/NovosadVictor/SRPseq/blob/main/tutorial/CD44/results/isoforms_tree.png)
+
+  Based on the structure of CD44 isoforms, constructed isoform-exon tree is fully imbalanced, meaning that each variable exon separate only one isoform from the remaining group.
+  In total, 5 of the variable exons were divider exons (exons 3, 6, 7, 12, 14) and, hence, 5 linear models were trained.
+ 	
+  As in the previous toy example, let us take a closer look to the single gene signature
+  (see [`config_for_summary_classifiers.json`](https://github.com/NovosadVictor/SRPseq/blob/main/tutorial/breast_cancer/config_for_summary_classifiers.json)). The following output files were not
+  covered in the toy example:
+  - [`feature_importances.pdf`](https://github.com/NovosadVictor/SRPseq/blob/main/tutorial/breast_cancer/results_summary_classifiers/feature_importances.pdf) (contains coefficients of the linear SVM classifier)
+  - [`model.pkl`](https://github.com/NovosadVictor/SRPseq/blob/main/tutorial/breast_cancer/results_summary_classifiers/model.pkl) (Python-pickled classifier and pre-processor objects)
+
+  ExhauFS also allows one to evaluate constucted classifiers on time-to-event data.
+  For example, let us evaluate the same ten-gene signature on 
+  additional RNA-seq TCGA-BRCA dataset. To do that, we should include to desired feature 
+  subset and pickled model path to the configuration file ([`config_for_km_plot.json`](https://github.com/NovosadVictor/SRPseq/blob/main/tutorial/breast_cancer/config_for_km_plot.json)).
+  The analysis could be done by running
+
+  `exhaufs km_plot -c config_for_km_plot.json`
+  
+  This will generate the Kaplan-Meier plot ([`results_km_plot/KM_TCGA-BRCA_Validation.pdf`](https://github.com/NovosadVictor/SRPseq/blob/main/tutorial/breast_cancer/results_km_plot/KM_TCGA-BRCA_Validation.pdf)).
+</details>
 
 # Running SRPseq
 
@@ -135,22 +178,14 @@ srpseq build -c <config_file>
 
 
 This will generate multiple files and directory in the specified output folder:
-* `isoforms_tree.png`: this file contains all models (classifiers or regressors) which passed the filtration together with their quality metrics.
-* `{gene}_isoforms.png`: for each pair of *n*, *k* three numbers are given: number of models which passed the filtration,
-number of models which showed reliable performance (i.e., passed quality thresholds) on the validation set and
-their ratio (in %). Low percentage of validation-reliable models together with high number of 
-filtration-reliable models is usually associated with overfitting.
-* `{score}.png`: for each pair (n, k), for each feature, percentage of models carrying this feature
-* `tree`: for each pair (n, k), for each feature, percentage of models carrying this feature 
-  * `transcirpts.json`: for each pair (n, k), for each feature, percentage of models carrying this feature 
-  * `scores.json`: for each pair (n, k), for each feature, percentage of models carrying this feature
-  * `coefs.csv`: for each pair (n, k), for each feature, percentage of models carrying this feature 
-  * `df.csv`: for each pair (n, k), for each feature, percentage of models carrying this feature 
-  * `left`: for each pair (n, k), for each feature, percentage of models carrying this feature 
-  * `right`: for each pair (n, k), for each feature, percentage of models carrying this feature 
-  is listed (only models which passed the filtration are considered).
-
-
-# Functions and classes
-
-
+* `isoforms_tree.png`: image of the constructed isoform-exon tree for the specified gene isoforms.
+* `{gene}_isoforms.png`: image of the exon-intron structure of all gene isoforms.
+* `scores/{score}.png`: directory with plots for accuracy scores on the validation set for all isoforms.
+* `tree`: tree-like directory containing results for each tree node.
+  * `transcirpts.json`: file containing list of node transcripts, list of parent trancripts and the number of the divider exon.
+  * `scores.json`: accuracy scores for the node model.
+  * `coefs.csv`: table with the node model coefficients. 
+  * `df.csv`: table containing data used for the model fitting (expression levels of used RBPs, isoforms ratio) and the model predicted values. 
+  * `[left]`: directory with the results for the left node. 
+  * `[right]`: directory with the results for the right node.
+  * `[by_tissue]`: directory with coefficients tables for tissues.

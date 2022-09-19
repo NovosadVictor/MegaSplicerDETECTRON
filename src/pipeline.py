@@ -7,7 +7,7 @@ from sklearn.model_selection import train_test_split
 from src.helpers.pipeline import map_motifs_to_exons, make_exons_sf_df
 from src.helpers.plots import plot_isoforms_tree, plot_gene_isoforms
 from src.lr import elastic_net
-from src.utils.common import predict, get_scores, add_freq_to_df, make_sure_dir_exists
+from src.utils.common import predict, get_scores, add_freq_to_df, make_sure_dir_exists, aggregated_score
 
 
 class Pipeline:
@@ -19,7 +19,9 @@ class Pipeline:
         self.rbps = rbps
         self.tree = None
         self.tissue_specific = self.config.get('tissue_specific', False) and 'Tissue' in self.rbp_df
+        self.tissues = []
         if self.tissue_specific:
+            self.tissues = set(self.rbp_df['Tissue'])
             self.rbp_df = add_freq_to_df(self.rbp_df)
 
         if 'Dataset.Type' in self.rbp_df.columns:
@@ -46,7 +48,7 @@ class Pipeline:
                     node.res = res
                     if self.tissue_specific:
                         node.tissue_res = {}
-                        for tissue in set(df['Tissue']):
+                        for tissue in self.tissues:
                             print(tissue)
                             tissue_df = df[df['Tissue'] == tissue]
                             tissue_df['Freq'] = 1
@@ -169,41 +171,78 @@ class Pipeline:
             return
 
         parents = [self.tree.left_child, self.tree.right_child]
-        isoform_accuracies = {}
+        transcript_accuracies = {}
         while len(parents):
             cur_parents = []
             for node_id, parent in enumerate(parents):
                 if parent.left_child is not None:
                     cur_parents += [parent.left_child, parent.right_child]
                 else:
-                    isoform_accuracies[parent.kwargs[0]['transcript_id']] = {
-                        'var.train': parent.df.loc[self.train_index]['fraq'],
-                        'var.validation': parent.df.loc[self.val_index]['fraq'],
+                    transcript = parent.kwargs[0]['transcript_id']
+                    transcript_accuracies[transcript] = {
+                        'var.train': self.isoforms_df.loc[self.train_index][transcript],
+                        'var.validation': self.isoforms_df.loc[self.val_index][transcript],
                         'train': parent.res['accuracy']['train.accumulative'],
                         'validation': parent.res['accuracy']['validation.accumulative'],
                         'tissue': {
                             tissue: {
                                 'train': parent.tissue_res[tissue]['accuracy']['train.accumulative'],
                                 'validation': parent.tissue_res[tissue]['accuracy']['validation.accumulative'],
-                                'var.train': parent.df.loc[self.train_index].query(f'Tissue == "{tissue}"')['fraq'],
-                                'var.validation': parent.df.loc[self.val_index].query(f'Tissue == "{tissue}"')['fraq'],
+                                'var.train': self.isoforms_df.loc[self.train_index].query(f'Tissue == "{tissue}"')[transcript],
+                                'var.validation': self.isoforms_df.loc[self.val_index].query(f'Tissue == "{tissue}"')[transcript],
                             } for tissue in parent.tissue_res
                         }
                     }
             parents = cur_parents
 
-        for score in ['cor', 'uplift.score']:
+        make_sure_dir_exists(f"{self.config['output_dir']}/scores/")
+        for score in ['cor', 'mds']:
             plt.figure(figsize=(8, 6))
-            ax = sns.scatterplot(
-                x=isoform_accuracies.keys(), y=[isoform_accuracies[iso]['validation'][score] for iso in isoform_accuracies],
-                color='blue', s=200,
+            bx = sns.boxplot(
+                x=transcript_accuracies.keys(),
+                y=[transcript_accuracies[iso]['var.validation'] for iso in transcript_accuracies],
             )
-            ax.legend(['Combined', 'Trained'])
-            plt.xticks(rotation=90)
-            ax.set_ylim(0, 1)
+            ax2 = bx.twinx()
+            sns.scatterplot(
+                x=transcript_accuracies.keys(),
+                y=[transcript_accuracies[iso]['validation'][score] for iso in transcript_accuracies],
+                color='blue', s=200, ax=ax2,
+            )
+            sns.scatterplot(
+                x=transcript_accuracies.keys(),
+                y=[transcript_accuracies[iso]['train'][score] for iso in transcript_accuracies],
+                color='red', s=200, ax=ax2,
+            )
+            ax2.legend(['Validation', 'Training'])
+            bx.set_xticklabels(bx.get_xticklabels(), rotation=90)
+            ax2.set_xticklabels(bx.get_xticklabels(), rotation=90)
+            ax2.set_ylim(0, 1)
+            bx.set_ylim(0, 1)
             plt.grid(visible=True)
             plt.tight_layout()
-            plt.savefig(f"{self.config['output_dir']}/{score}.png", dpi=300)
+            plt.show()
+            plt.savefig(f"{self.config['output_dir']}/scores/{score}.png", dpi=300)
+
+            if self.tissue_specific:
+                tissue_scores = [aggregated_score(transcript_accuracies, tissue) for tissue in self.tissues]
+                plt.figure(figsize=(8, 6))
+                ax = sns.scatterplot(
+                    x=self.tissues,
+                    y=[s['validation'][score] for s in tissue_scores],
+                    color='blue', s=200,
+                )
+                sns.scatterplot(
+                    x=self.tissues,
+                    y=[s['train'][score] for s in tissue_scores],
+                    color='red', s=200, ax=ax,
+                )
+                ax.legend(['Validation', 'Training'])
+                ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+                ax.set_ylim(0, 1)
+                plt.grid(visible=True)
+                plt.tight_layout()
+                plt.show()
+                plt.savefig(f"{self.config['output_dir']}/scores/by_tissue.{score}.png", dpi=300)
 
     @staticmethod
     def save_res_(node, path):
@@ -221,10 +260,14 @@ class Pipeline:
                         },
                         'divider_exon': node.divider_exon,
                     }, f)
+                with open(f'{path}/scores.json', 'w') as f:
+                    json.dump(node.res.get('accuracy'), f)
 
                 for tissue in getattr(node, 'tissue_res', {}):
                     make_sure_dir_exists(f'{path}/by_tissue/{tissue}/')
                     node.tissue_res[tissue]['coefs'].to_csv(f'{path}/by_tissue/{tissue}/coefs.tsv', sep='\t')
+                    with open(f'{path}/by_tissue/{tissue}/scores.json', 'w') as f:
+                        json.dump(node.tissue_res[tissue].get('accuracy'), f)
 
             Pipeline.save_res_(node.left_child, path=f'{path}/left/')
             Pipeline.save_res_(node.right_child, path=f'{path}/right/')

@@ -28,14 +28,14 @@ def get_accuracy(model, df, is_numpy=False):
     #
     mean_pred, mean_true = np.median(inlogit(predictions)), np.median(df['fraq'])
     uplift = (mean_pred - mean_true) / mean_true
-    uplift_score = max(0, 1 - abs(uplift))
+    mds = max(0, 1 - abs(uplift))
     #
     return {
         'cor': cor,
         'r2': r2,
         'mann-w': mann_w,
         'uplift': uplift,
-        'uplift.score': uplift_score,
+        'mds': mds,
         'mean_pred': mean_pred,
         'mean_true': mean_true,
     }

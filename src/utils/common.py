@@ -72,7 +72,7 @@ def get_scores(pred, true):
         mean_pred = 0
         mean_true = 0
         uplift = 1
-        uplift_score = 0
+        mds = 0
     else:
         cor = pearsonr(pred, logit(true))[0]
         r2 = max(0, r2_score(pred, logit(true)))
@@ -80,16 +80,45 @@ def get_scores(pred, true):
         #
         mean_pred, mean_true = np.median(inlogit(pred)), np.median(true)
         uplift = (mean_pred - mean_true) / mean_true
-        uplift_score = max(0, 1 - abs(uplift))
+        mds = max(0, 1 - abs(uplift))
     #
     return {
         'cor': cor,
         'r2': r2,
         'mann-w': mann_w,
         'uplift': uplift,
-        'uplift.score': uplift_score,
+        'mds': mds,
         'mean_pred': mean_pred,
         'mean_true': mean_true,
+    }
+
+
+def aggregated_score(transcript_accuracies, tissue):
+    transcripts_variance_train = sum(transcript_accuracies[iso][tissue]['var.train'] for iso in transcript_accuracies)
+    transcripts_variance_val = sum(transcript_accuracies[iso][tissue]['var.validation'] for iso in transcript_accuracies)
+    return {
+        'train': {
+            'cor': sum(
+                transcript_accuracies[iso][tissue]['train']['cor'] * transcript_accuracies[iso][tissue]['var.train']
+                for iso in transcript_accuracies
+            ) / transcripts_variance_train,
+            'mds': sum(
+                transcript_accuracies[iso][tissue]['train']['mds'] * transcript_accuracies[iso][tissue]['var.train']
+                for iso in transcript_accuracies
+            ) / transcripts_variance_train
+        },
+        'validation': {
+            'cor': sum(
+                transcript_accuracies[iso][tissue]['validation']['cor'] * transcript_accuracies[iso][tissue][
+                    'var.validation']
+                for iso in transcript_accuracies
+            ) / transcripts_variance_val,
+            'mds': sum(
+                transcript_accuracies[iso][tissue]['validation']['mds'] * transcript_accuracies[iso][tissue][
+                    'var.validation']
+                for iso in transcript_accuracies
+            ) / transcripts_variance_val
+        }
     }
 
 
