@@ -188,8 +188,8 @@ class Pipeline:
                             tissue: {
                                 'train': parent.tissue_res[tissue]['accuracy']['train.accumulative'],
                                 'validation': parent.tissue_res[tissue]['accuracy']['validation.accumulative'],
-                                'var.train': self.isoforms_df.loc[self.train_index].query(f'Tissue == "{tissue}"')[transcript],
-                                'var.validation': self.isoforms_df.loc[self.val_index].query(f'Tissue == "{tissue}"')[transcript],
+                                'var.train': self.isoforms_df.loc[self.train_index&(self.rbp_df['Tissue'] == tissue)][transcript],
+                                'var.validation': self.isoforms_df.loc[self.val_index&(self.rbp_df['Tissue'] == tissue)[transcript],
                             } for tissue in parent.tissue_res
                         }
                     }
