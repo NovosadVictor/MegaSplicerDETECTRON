@@ -94,27 +94,27 @@ def get_scores(pred, true):
 
 
 def aggregated_score(transcript_accuracies, tissue):
-    transcripts_variance_train = sum(transcript_accuracies[iso][tissue]['var.train'] for iso in transcript_accuracies)
-    transcripts_variance_val = sum(transcript_accuracies[iso][tissue]['var.validation'] for iso in transcript_accuracies)
+    transcripts_variance_train = sum(transcript_accuracies[iso]['tissue'][tissue]['var.train'] for iso in transcript_accuracies)
+    transcripts_variance_val = sum(transcript_accuracies[iso]['tissue'][tissue]['var.validation'] for iso in transcript_accuracies)
     return {
         'train': {
             'cor': sum(
-                transcript_accuracies[iso][tissue]['train']['cor'] * transcript_accuracies[iso][tissue]['var.train']
+                transcript_accuracies[iso]['tissue'][tissue]['train']['cor'] * transcript_accuracies[iso]['tissue'][tissue]['var.train']
                 for iso in transcript_accuracies
             ) / transcripts_variance_train,
             'mds': sum(
-                transcript_accuracies[iso][tissue]['train']['mds'] * transcript_accuracies[iso][tissue]['var.train']
+                transcript_accuracies[iso][tissue]['tissue']['train']['mds'] * transcript_accuracies[iso]['tissue'][tissue]['var.train']
                 for iso in transcript_accuracies
             ) / transcripts_variance_train
         },
         'validation': {
             'cor': sum(
-                transcript_accuracies[iso][tissue]['validation']['cor'] * transcript_accuracies[iso][tissue][
+                transcript_accuracies[iso]['tissue'][tissue]['validation']['cor'] * transcript_accuracies[iso]['tissue'][tissue][
                     'var.validation']
                 for iso in transcript_accuracies
             ) / transcripts_variance_val,
             'mds': sum(
-                transcript_accuracies[iso][tissue]['validation']['mds'] * transcript_accuracies[iso][tissue][
+                transcript_accuracies[iso]['tissue'][tissue]['validation']['mds'] * transcript_accuracies[iso]['tissue'][tissue][
                     'var.validation']
                 for iso in transcript_accuracies
             ) / transcripts_variance_val
