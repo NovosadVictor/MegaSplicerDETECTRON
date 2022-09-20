@@ -180,6 +180,7 @@ class Pipeline:
                 if parent.left_child is not None:
                     cur_parents += [parent.left_child, parent.right_child]
                 else:
+                    print([t['transcript_id'] for t in parent.kwargs], parent.tissue_res.keys())
                     transcript = parent.kwargs[0]['transcript_id']
                     transcript_accuracies[transcript] = {
                         'var.train': self.isoforms_df.loc[self.train_index][transcript],
@@ -192,7 +193,7 @@ class Pipeline:
                                 'validation': parent.tissue_res[tissue]['accuracy']['validation.accumulative'],
                                 'var.train': self.isoforms_df.loc[self.train_index&(self.rbp_df['Tissue'] == tissue)][transcript],
                                 'var.validation': self.isoforms_df.loc[self.val_index&(self.rbp_df['Tissue'] == tissue)][transcript],
-                            } for tissue in self.tissues
+                            } for tissue in parent.tissue_res
                         }
                     }
             parents = cur_parents
@@ -200,7 +201,7 @@ class Pipeline:
         make_sure_dir_exists(f"{self.config['output_dir']}/scores/")
         for score in ['cor', 'mds']:
             plt.figure(figsize=(8, 6))
-            print(transcript_accuracies)
+            print(self.isoforms_df[list(transcript_accuracies.keys())])
             bx = sns.boxplot(
                 data=self.isoforms_df[list(transcript_accuracies.keys())],
             )
