@@ -1,5 +1,7 @@
 import pickle
 import json
+
+import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -197,11 +199,10 @@ class Pipeline:
 
         make_sure_dir_exists(f"{self.config['output_dir']}/scores/")
         for score in ['cor', 'mds']:
-            print(score, transcript_accuracies.keys(), [transcript_accuracies[iso]['var.validation'] for iso in transcript_accuracies])
             plt.figure(figsize=(8, 6))
             bx = sns.boxplot(
+                data=self.isoforms_df,
                 x=transcript_accuracies.keys(),
-                y=[transcript_accuracies[iso]['var.validation'] for iso in transcript_accuracies],
             )
             ax2 = bx.twinx()
             sns.scatterplot(
