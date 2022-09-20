@@ -200,9 +200,9 @@ class Pipeline:
         make_sure_dir_exists(f"{self.config['output_dir']}/scores/")
         for score in ['cor', 'mds']:
             plt.figure(figsize=(8, 6))
+            print(self.isoforms_df[list(transcript_accuracies.keys())])
             bx = sns.boxplot(
-                data=self.isoforms_df,
-                x=transcript_accuracies.keys(),
+                data=self.isoforms_df[list(transcript_accuracies.keys())],
             )
             ax2 = bx.twinx()
             sns.scatterplot(
