@@ -182,7 +182,6 @@ class Pipeline:
                 if node.left_child is not None:
                     cur_nodes += [node.left_child, node.right_child]
                 else:
-                    print([t['transcript_id'] for t in node.kwargs], node.tissue_res.keys())
                     transcript = node.kwargs[0]['transcript_id']
                     transcript_accuracies[transcript] = {
                         'var.train': self.isoforms_df.loc[self.train_index][transcript],
@@ -203,7 +202,6 @@ class Pipeline:
         make_sure_dir_exists(f"{self.config['output_dir']}/scores/")
         for score in ['cor', 'mds']:
             plt.figure(figsize=(8, 6))
-            print(self.isoforms_df[list(transcript_accuracies.keys())])
             bx = sns.boxplot(
                 data=self.isoforms_df[list(transcript_accuracies.keys())].div(self.isoforms_df[list(transcript_accuracies.keys())].sum(axis=1), axis=0),
             )
@@ -230,7 +228,6 @@ class Pipeline:
 
             if self.tissue_specific:
                 tissue_scores = [aggregated_score(transcript_accuracies, tissue) for tissue in self.tissues]
-                print(tissue_scores)
                 plt.figure(figsize=(8, 6))
                 ax = sns.scatterplot(
                     x=list(self.tissues),
@@ -243,7 +240,7 @@ class Pipeline:
                     color='red', s=200, ax=ax,
                 )
                 ax.legend(['Validation', 'Training'])
-                # ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+                plt.xticks(rotation=90)
                 ax.set_ylim(0, 1)
                 plt.grid(visible=True)
                 plt.tight_layout()
