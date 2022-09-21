@@ -271,9 +271,11 @@ class Pipeline:
 
                 for tissue in getattr(node, 'tissue_res', {}):
                     make_sure_dir_exists(f'{path}/by_tissue/{tissue}/')
-                    node.tissue_res[tissue]['coefs'].to_csv(f'{path}/by_tissue/{tissue}/coefs.tsv', sep='\t')
-                    with open(f'{path}/by_tissue/{tissue}/scores.json', 'w') as f:
-                        json.dump(node.tissue_res[tissue].get('accuracy'), f)
+                    if 'coefs' in node.tissue_res[tissue]:
+                        node.tissue_res[tissue]['coefs'].to_csv(f'{path}/by_tissue/{tissue}/coefs.tsv', sep='\t')
+                    if 'accuracy' in node.tissue_res[tissue]:
+                        with open(f'{path}/by_tissue/{tissue}/scores.json', 'w') as f:
+                            json.dump(node.tissue_res[tissue]['accuracy'], f)
 
             Pipeline.save_res_(node.left_child, path=f'{path}/left/')
             Pipeline.save_res_(node.right_child, path=f'{path}/right/')

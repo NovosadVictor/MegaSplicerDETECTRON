@@ -96,6 +96,7 @@ def get_scores(pred, true):
 def aggregated_score(transcript_accuracies, tissue):
     transcripts_variance_train = sum(transcript_accuracies[iso]['tissue'][tissue]['var.train'].var() for iso in transcript_accuracies)
     transcripts_variance_val = sum(transcript_accuracies[iso]['tissue'][tissue]['var.validation'].var() for iso in transcript_accuracies)
+    print(tissue, transcripts_variance_train, transcripts_variance_val)
     return {
         'train': {
             'cor': sum(
