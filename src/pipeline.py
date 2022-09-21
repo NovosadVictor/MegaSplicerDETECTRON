@@ -83,120 +83,120 @@ class Pipeline:
         if self.tree is None:
             return
 
-        parents = [self.tree.left_child, self.tree.right_child]
-        while len(parents):
-            cur_parents = []
-            for node_id, parent in enumerate(parents):
+        nodes = [self.tree.left_child, self.tree.right_child]
+        while len(nodes):
+            cur_nodes = []
+            for node_id, node in enumerate(nodes):
                 if node_id % 2 == 0:
-                    parent.res['predictions.train'] = predict(parent.df.loc[self.train_index], parent.res['coefs'], logit=False)
-                    parent.res['predictions.validation'] = predict(parent.df.loc[self.val_index], parent.res['coefs'], logit=False)
+                    node.res['predictions.train'] = predict(node.df.loc[self.train_index], node.res['coefs'], logit=False)
+                    node.res['predictions.validation'] = predict(node.df.loc[self.val_index], node.res['coefs'], logit=False)
 
-                    for tissue in getattr(parent, 'tissue_res', {}):
-                        parent.tissue_res[tissue]['predictions.train'] = predict(
-                            parent.df.loc[self.train_index].query(f'Tissue == "{tissue}"'),
-                            parent.tissue_res[tissue]['coefs'],
+                    for tissue in self.tissues:
+                        node.tissue_res[tissue]['predictions.train'] = predict(
+                            node.df.loc[self.train_index].query(f'Tissue == "{tissue}"'),
+                            node.tissue_res[tissue]['coefs'],
                             logit=False,
                         )
-                        parent.tissue_res[tissue]['predictions.validation'] = predict(
-                            parent.df.loc[self.val_index].query(f'Tissue == "{tissue}"'),
-                            parent.tissue_res[tissue]['coefs'],
+                        node.tissue_res[tissue]['predictions.validation'] = predict(
+                            node.df.loc[self.val_index].query(f'Tissue == "{tissue}"'),
+                            node.tissue_res[tissue]['coefs'],
                             logit=False,
                         )
                 else:
-                    parent.res['predictions.train'] = 1 - parents[node_id - 1].res['predictions.train']
-                    parent.res['predictions.validation'] = 1 - parents[node_id - 1].res['predictions.validation']
+                    node.res['predictions.train'] = 1 - nodes[node_id - 1].res['predictions.train']
+                    node.res['predictions.validation'] = 1 - nodes[node_id - 1].res['predictions.validation']
 
-                    for tissue in getattr(parent, 'tissue_res', {}):
-                        parent.tissue_res[tissue]['predictions.train'] = 1 - parents[node_id - 1].tissue_res[tissue]['predictions.train']
-                        parent.tissue_res[tissue]['predictions.validation'] = 1 - parents[node_id - 1].tissue_res[tissue]['predictions.validation']
+                    for tissue in self.tissues:
+                        node.tissue_res[tissue]['predictions.train'] = 1 - nodes[node_id - 1].tissue_res[tissue]['predictions.train']
+                        node.tissue_res[tissue]['predictions.validation'] = 1 - nodes[node_id - 1].tissue_res[tissue]['predictions.validation']
 
-                parent.res['predictions.train.accumulative'] = parent.parent.res.get('predictions.train.accumulative', 1) * parent.res['predictions.train']
-                parent.res['predictions.validation.accumulative'] = parent.parent.res.get('predictions.validation.accumulative', 1) * parent.res['predictions.validation']
+                node.res['predictions.train.accumulative'] = node.parent.res.get('predictions.train.accumulative', 1) * node.res['predictions.train']
+                node.res['predictions.validation.accumulative'] = node.parent.res.get('predictions.validation.accumulative', 1) * node.res['predictions.validation']
 
-                for tissue in getattr(parent, 'tissue_res', {}):
-                    parent.tissue_res[tissue]['predictions.train.accumulative'] = parent.parent.tissue_res.get(tissue, {}).get('predictions.train.accumulative', 1) * parent.tissue_res[tissue]['predictions.train']
-                    parent.tissue_res[tissue]['predictions.validation.accumulative'] = parent.parent.tissue_res.get(tissue, {}).get('predictions.validation.accumulative', 1) * parent.tissue_res[tissue]['predictions.validation']
+                for tissue in self.tissues:
+                    node.tissue_res[tissue]['predictions.train.accumulative'] = node.parent.tissue_res.get(tissue, {}).get('predictions.train.accumulative', 1) * node.tissue_res[tissue]['predictions.train']
+                    node.tissue_res[tissue]['predictions.validation.accumulative'] = node.parent.tissue_res.get(tissue, {}).get('predictions.validation.accumulative', 1) * node.tissue_res[tissue]['predictions.validation']
 
-                if parent.left_child is not None:
-                    cur_parents += [parent.left_child, parent.right_child]
+                if node.left_child is not None:
+                    cur_nodes += [node.left_child, node.right_child]
 
-            parents = cur_parents
+            nodes = cur_nodes
 
     def accuracy(self):
         if self.tree is None:
             return
 
-        parents = [self.tree.left_child, self.tree.right_child]
-        while len(parents):
-            cur_parents = []
-            for node_id, parent in enumerate(parents):
-                print(parent.res['predictions.train'], parent.df.loc[self.train_index]['fraq'])
-                train_acc = get_scores(parent.res['predictions.train'], parent.df.loc[self.train_index]['fraq'])
-                val_acc = get_scores(parent.res['predictions.validation'], parent.df.loc[self.val_index]['fraq'])
-                parent.res['accuracy'] = {
+        nodes = [self.tree.left_child, self.tree.right_child]
+        while len(nodes):
+            cur_nodes = []
+            for node_id, node in enumerate(nodes):
+                print(node.res['predictions.train'], node.df.loc[self.train_index]['fraq'])
+                train_acc = get_scores(node.res['predictions.train'], node.df.loc[self.train_index]['fraq'])
+                val_acc = get_scores(node.res['predictions.validation'], node.df.loc[self.val_index]['fraq'])
+                node.res['accuracy'] = {
                     'train': train_acc,
                     'validation': val_acc,
                 }
-                for tissue in getattr(parent, 'tissue_res', {}):
-                    train_acc = get_scores(parent.tissue_res[tissue]['predictions.train'], parent.df.loc[self.train_index].query(f'Tissue == "{tissue}"')['fraq'])
-                    val_acc = get_scores(parent.tissue_res[tissue]['predictions.validation'], parent.df.loc[self.val_index].query(f'Tissue == "{tissue}"')['fraq'])
-                    parent.tissue_res[tissue]['accuracy'] = {
+                for tissue in self.tissues:
+                    train_acc = get_scores(node.tissue_res[tissue]['predictions.train'], node.df.loc[self.train_index].query(f'Tissue == "{tissue}"')['fraq'])
+                    val_acc = get_scores(node.tissue_res[tissue]['predictions.validation'], node.df.loc[self.val_index].query(f'Tissue == "{tissue}"')['fraq'])
+                    node.tissue_res[tissue]['accuracy'] = {
                         'train': train_acc,
                         'validation': val_acc,
                     }
-                if parent.left_child is not None:
-                    cur_parents += [parent.left_child, parent.right_child]
+                if node.left_child is not None:
+                    cur_nodes += [node.left_child, node.right_child]
                 else: # leaf node (isoform)
-                    parent.res['accuracy']['train.accumulative'] = get_scores(
-                        parent.res['predictions.train.accumulative'],
-                        parent.df.loc[self.train_index]['fraq'],
+                    node.res['accuracy']['train.accumulative'] = get_scores(
+                        node.res['predictions.train.accumulative'],
+                        node.df.loc[self.train_index]['fraq'],
                     )
-                    parent.res['accuracy']['validation.accumulative'] = get_scores(
-                        parent.res['predictions.validation.accumulative'],
-                        parent.df.loc[self.val_index]['fraq'],
+                    node.res['accuracy']['validation.accumulative'] = get_scores(
+                        node.res['predictions.validation.accumulative'],
+                        node.df.loc[self.val_index]['fraq'],
                     )
 
-                    for tissue in getattr(parent, 'tissue_res', {}):
-                        parent.tissue_res[tissue]['accuracy']['train.accumulative'] = get_scores(
-                            parent.tissue_res[tissue]['predictions.train.accumulative'],
-                            parent.df.loc[self.train_index].query(f'Tissue == "{tissue}"')['fraq'],
+                    for tissue in self.tissues:
+                        node.tissue_res[tissue]['accuracy']['train.accumulative'] = get_scores(
+                            node.tissue_res[tissue]['predictions.train.accumulative'],
+                            node.df.loc[self.train_index].query(f'Tissue == "{tissue}"')['fraq'],
                         )
-                        parent.tissue_res[tissue]['accuracy']['validation.accumulative'] = get_scores(
-                            parent.tissue_res[tissue]['predictions.validation.accumulative'],
-                            parent.df.loc[self.val_index].query(f'Tissue == "{tissue}"')['fraq'],
+                        node.tissue_res[tissue]['accuracy']['validation.accumulative'] = get_scores(
+                            node.tissue_res[tissue]['predictions.validation.accumulative'],
+                            node.df.loc[self.val_index].query(f'Tissue == "{tissue}"')['fraq'],
                         )
 
-            parents = cur_parents
+            nodes = cur_nodes
 
     def plot(self):
         if self.tree is None:
             return
 
-        parents = [self.tree.left_child, self.tree.right_child]
+        nodes = [self.tree.left_child, self.tree.right_child]
         transcript_accuracies = {}
-        while len(parents):
-            cur_parents = []
-            for node_id, parent in enumerate(parents):
-                if parent.left_child is not None:
-                    cur_parents += [parent.left_child, parent.right_child]
+        while len(nodes):
+            cur_nodes = []
+            for node_id, node in enumerate(nodes):
+                if node.left_child is not None:
+                    cur_nodes += [node.left_child, node.right_child]
                 else:
-                    print([t['transcript_id'] for t in parent.kwargs], parent.tissue_res.keys())
-                    transcript = parent.kwargs[0]['transcript_id']
+                    print([t['transcript_id'] for t in node.kwargs], node.tissue_res.keys())
+                    transcript = node.kwargs[0]['transcript_id']
                     transcript_accuracies[transcript] = {
                         'var.train': self.isoforms_df.loc[self.train_index][transcript],
                         'var.validation': self.isoforms_df.loc[self.val_index][transcript],
-                        'train': parent.res['accuracy']['train.accumulative'],
-                        'validation': parent.res['accuracy']['validation.accumulative'],
+                        'train': node.res['accuracy']['train.accumulative'],
+                        'validation': node.res['accuracy']['validation.accumulative'],
                         'tissue': {
                             tissue: {
-                                'train': parent.tissue_res[tissue]['accuracy']['train.accumulative'],
-                                'validation': parent.tissue_res[tissue]['accuracy']['validation.accumulative'],
+                                'train': node.tissue_res[tissue]['accuracy']['train.accumulative'],
+                                'validation': node.tissue_res[tissue]['accuracy']['validation.accumulative'],
                                 'var.train': self.isoforms_df.loc[self.train_index&(self.rbp_df['Tissue'] == tissue)][transcript],
                                 'var.validation': self.isoforms_df.loc[self.val_index&(self.rbp_df['Tissue'] == tissue)][transcript],
-                            } for tissue in parent.tissue_res
+                            } for tissue in node.tissue_res
                         }
                     }
-            parents = cur_parents
+            nodes = cur_nodes
 
         make_sure_dir_exists(f"{self.config['output_dir']}/scores/")
         for score in ['cor', 'mds']:
