@@ -107,8 +107,10 @@ class Pipeline:
                     node.res['predictions.validation'] = 1 - nodes[node_id - 1].res['predictions.validation']
 
                     for tissue in self.tissues:
-                        node.tissue_res[tissue]['predictions.train'] = 1 - nodes[node_id - 1].tissue_res[tissue]['predictions.train']
-                        node.tissue_res[tissue]['predictions.validation'] = 1 - nodes[node_id - 1].tissue_res[tissue]['predictions.validation']
+                        node.tissue_res[tissue] = {
+                            'predictions.train': 1 - nodes[node_id - 1].tissue_res[tissue]['predictions.train'],
+                            'predictions.validation': 1 - nodes[node_id - 1].tissue_res[tissue]['predictions.validation'],
+                        }
 
                 node.res['predictions.train.accumulative'] = node.parent.res.get('predictions.train.accumulative', 1) * node.res['predictions.train']
                 node.res['predictions.validation.accumulative'] = node.parent.res.get('predictions.validation.accumulative', 1) * node.res['predictions.validation']
