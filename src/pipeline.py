@@ -230,6 +230,7 @@ class Pipeline:
 
             if self.tissue_specific:
                 tissue_scores = [aggregated_score(transcript_accuracies, tissue) for tissue in self.tissues]
+                print(tissue_scores)
                 plt.figure(figsize=(8, 6))
                 ax = sns.scatterplot(
                     x=list(self.tissues),
