@@ -205,7 +205,7 @@ class Pipeline:
             plt.figure(figsize=(8, 6))
             print(self.isoforms_df[list(transcript_accuracies.keys())])
             bx = sns.boxplot(
-                data=self.isoforms_df[list(transcript_accuracies.keys())],
+                data=self.isoforms_df[list(transcript_accuracies.keys())].div(self.isoforms_df[list(transcript_accuracies.keys())].sum(axis=1), axis=0),
             )
             ax2 = bx.twinx()
             sns.scatterplot(
@@ -243,7 +243,7 @@ class Pipeline:
                     color='red', s=200, ax=ax,
                 )
                 ax.legend(['Validation', 'Training'])
-                ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
+                # ax.set_xticklabels(ax.get_xticklabels(), rotation=90)
                 ax.set_ylim(0, 1)
                 plt.grid(visible=True)
                 plt.tight_layout()
