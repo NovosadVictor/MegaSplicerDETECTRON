@@ -232,12 +232,12 @@ class Pipeline:
                 tissue_scores = [aggregated_score(transcript_accuracies, tissue) for tissue in self.tissues]
                 plt.figure(figsize=(8, 6))
                 ax = sns.scatterplot(
-                    x=self.tissues,
+                    x=list(self.tissues),
                     y=[s['validation'][score] for s in tissue_scores],
                     color='blue', s=200,
                 )
                 sns.scatterplot(
-                    x=self.tissues,
+                    x=list(self.tissues),
                     y=[s['train'][score] for s in tissue_scores],
                     color='red', s=200, ax=ax,
                 )
