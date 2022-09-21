@@ -103,7 +103,7 @@ def aggregated_score(transcript_accuracies, tissue):
                 for iso in transcript_accuracies
             ) / transcripts_variance_train,
             'mds': sum(
-                transcript_accuracies[iso][tissue]['tissue']['train']['mds'] * transcript_accuracies[iso]['tissue'][tissue]['var.train']
+                transcript_accuracies[iso]['tissue'][tissue]['train']['mds'] * transcript_accuracies[iso]['tissue'][tissue]['var.train']
                 for iso in transcript_accuracies
             ) / transcripts_variance_train
         },
