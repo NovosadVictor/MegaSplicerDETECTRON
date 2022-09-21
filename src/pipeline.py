@@ -193,8 +193,8 @@ class Pipeline:
                             tissue: {
                                 'train': node.tissue_res[tissue]['accuracy']['train.accumulative'],
                                 'validation': node.tissue_res[tissue]['accuracy']['validation.accumulative'],
-                                'var.train': self.isoforms_df.loc[self.train_index&(self.rbp_df['Tissue'] == tissue)][transcript],
-                                'var.validation': self.isoforms_df.loc[self.val_index&(self.rbp_df['Tissue'] == tissue)][transcript],
+                                'var.train': self.isoforms_df.loc[set(self.train_index)&set(self.rbp_df[self.rbp_df['Tissue'] == tissue].index)][transcript],
+                                'var.validation': self.isoforms_df.loc[set(self.val_index)&set(self.rbp_df[self.rbp_df['Tissue'] == tissue].index)][transcript],
                             } for tissue in node.tissue_res
                         }
                     }
