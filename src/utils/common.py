@@ -94,7 +94,7 @@ def get_scores(pred, true):
 
 
 def aggregated_score(transcript_accuracies, tissue):
-    print(tissue, [transcript_accuracies[iso]['tissue'][tissue]['var.train'].dropna() for iso in transcript_accuracies])
+    print(tissue, [transcript_accuracies[iso]['tissue'][tissue]['var.train'] for iso in transcript_accuracies])
     print(tissue, [transcript_accuracies[iso]['tissue'][tissue]['var.train'].dropna().var() for iso in transcript_accuracies])
     transcripts_variance_train = sum(transcript_accuracies[iso]['tissue'][tissue]['var.train'].dropna().var() for iso in transcript_accuracies)
     transcripts_variance_val = sum(transcript_accuracies[iso]['tissue'][tissue]['var.validation'].dropna().var() for iso in transcript_accuracies)
