@@ -1,9 +1,6 @@
 # SRPseq
 
-Splicing Regulation Prediction from RNA-seq data. Please cite this paper if you are using SRPseq in your work:
-
-Nersisyan S, Novosad V, Tonevitsky A. SRPseq: Splicing Regulation Prediction from RNA-seq data. bioRxiv. 2021 Aug 04. doi: [10.1101/2021.08.03.454798](https://doi.org/10.1101/2021.08.03.454798).
-
+Splicing Regulation Prediction from RNA-seq data.
 
 ## Table of Contents  
 [Introduction](#introduction)  
